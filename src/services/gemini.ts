@@ -1,4 +1,4 @@
-import { Message, Task, AssessmentResult } from "../types";
+import { Message, Task, AssessmentResult, AssessmentMode } from "../types";
 
 type ApiError = {
   error?: string;
@@ -29,10 +29,18 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function chatWithExecutiveLLM(messages: Message[], task: Task): Promise<Message[]> {
-  return postJson<Message[]>("/api/chat", { messages, task });
+export async function chatWithExecutiveLLM(
+  messages: Message[],
+  task: Task,
+  assessmentMode: AssessmentMode
+): Promise<Message[]> {
+  return postJson<Message[]>("/api/chat", { messages, task, assessmentMode });
 }
 
-export async function evaluateTranscript(messages: Message[], task: Task): Promise<AssessmentResult> {
-  return postJson<AssessmentResult>("/api/evaluate", { messages, task });
+export async function evaluateTranscript(
+  messages: Message[],
+  task: Task,
+  assessmentMode: AssessmentMode
+): Promise<AssessmentResult> {
+  return postJson<AssessmentResult>("/api/evaluate", { messages, task, assessmentMode });
 }

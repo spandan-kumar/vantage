@@ -16,12 +16,12 @@ app.get("/api/health", (_req, res) => {
 
 app.post("/api/chat", async (req, res) => {
   try {
-    const { messages, task } = req.body ?? {};
+    const { messages, task, assessmentMode } = req.body ?? {};
     if (!Array.isArray(messages) || !task || typeof task !== "object") {
       return res.status(400).json({ error: "Invalid request payload" });
     }
 
-    const output = await chatWithExecutiveLLM(messages, task);
+    const output = await chatWithExecutiveLLM(messages, task, assessmentMode);
     return res.json(output);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected server error";
@@ -31,12 +31,12 @@ app.post("/api/chat", async (req, res) => {
 
 app.post("/api/evaluate", async (req, res) => {
   try {
-    const { messages, task } = req.body ?? {};
+    const { messages, task, assessmentMode } = req.body ?? {};
     if (!Array.isArray(messages) || !task || typeof task !== "object") {
       return res.status(400).json({ error: "Invalid request payload" });
     }
 
-    const output = await evaluateTranscript(messages, task);
+    const output = await evaluateTranscript(messages, task, assessmentMode);
     return res.json(output);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected server error";

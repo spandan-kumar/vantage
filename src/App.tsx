@@ -1,18 +1,43 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { TASKS } from './data/tasks';
-import { Task, Message, AssessmentResult } from './types';
+import { Task, Message, AssessmentResult, AssessmentMode, SkillCategory } from './types';
 import ChatInterface from './components/ChatInterface';
 import AssessmentReport from './components/AssessmentReport';
 import { evaluateTranscript } from './services/gemini';
 import { BrainCircuit, Users, Lightbulb, FileText, Loader2 } from 'lucide-react';
-import { cn } from './lib/utils';
 
 type AppState = 'SELECTION' | 'CHAT' | 'EVALUATING' | 'REPORT';
+const HISTORY_STORAGE_KEY = 'vantage-assessment-history-v1';
+
+interface HistoryEntry {
+  id: string;
+  timestamp: string;
+  mode: AssessmentMode;
+  skill: SkillCategory;
+  overallScore: number | 'NA';
+  overallConfidence: number;
+  minimumEvidenceMet: boolean;
+}
+
+function loadHistory(): HistoryEntry[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.slice(0, 20);
+  } catch {
+    return [];
+  }
+}
 
 function App() {
   const [appState, setAppState] = useState<AppState>('SELECTION');
+  const [assessmentMode, setAssessmentMode] = useState<AssessmentMode>('assessment');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [assessmentResult, setAssessmentResult] = useState<AssessmentResult | null>(null);
+  const [history, setHistory] = useState<HistoryEntry[]>(() => loadHistory());
 
   const handleStartTask = (task: Task) => {
     setSelectedTask(task);
@@ -24,8 +49,20 @@ function App() {
     
     setAppState('EVALUATING');
     try {
-      const result = await evaluateTranscript(messages, selectedTask);
+      const result = await evaluateTranscript(messages, selectedTask, assessmentMode);
       setAssessmentResult(result);
+      const newEntry: HistoryEntry = {
+        id: `${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        mode: assessmentMode,
+        skill: result.skill,
+        overallScore: result.overallScore,
+        overallConfidence: result.overallConfidence,
+        minimumEvidenceMet: result.minimumEvidenceMet,
+      };
+      const nextHistory = [newEntry, ...history].slice(0, 20);
+      setHistory(nextHistory);
+      window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(nextHistory));
       setAppState('REPORT');
     } catch (error) {
       console.error("Failed to evaluate transcript:", error);
@@ -39,6 +76,11 @@ function App() {
     setSelectedTask(null);
     setAssessmentResult(null);
   };
+
+  const skillHistory = useMemo(() => {
+    if (!assessmentResult) return [];
+    return history.filter((entry) => entry.skill === assessmentResult.skill).slice(0, 5);
+  }, [assessmentResult, history]);
 
   const getSkillIcon = (skill: string) => {
     switch (skill) {
@@ -73,6 +115,20 @@ function App() {
               <p className="text-lg text-theme-text-muted">
                 Engage in simulated group tasks with AI teammates. Our Executive LLM will steer the conversation to elicit evidence of your skills, and an AI Evaluator will provide a detailed psychometric assessment.
               </p>
+              <div className="inline-flex bg-theme-surface border border-theme-border rounded-md p-1">
+                <button
+                  onClick={() => setAssessmentMode('assessment')}
+                  className={`px-3 py-1.5 text-sm rounded ${assessmentMode === 'assessment' ? 'bg-theme-accent text-white' : 'text-theme-text-muted'}`}
+                >
+                  Assessment Mode
+                </button>
+                <button
+                  onClick={() => setAssessmentMode('practice')}
+                  className={`px-3 py-1.5 text-sm rounded ${assessmentMode === 'practice' ? 'bg-theme-accent text-white' : 'text-theme-text-muted'}`}
+                >
+                  Practice Mode
+                </button>
+              </div>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6 mt-12">
@@ -110,9 +166,14 @@ function App() {
           <div className="max-w-4xl mx-auto animate-in fade-in zoom-in-95 duration-300">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-theme-text-main">{selectedTask.title}</h2>
-                <p className="text-theme-text-muted">Interact with your AI teammates to complete the task.</p>
-              </div>
+                  <h2 className="text-2xl font-bold text-theme-text-main">{selectedTask.title}</h2>
+                  <p className="text-theme-text-muted">
+                    Interact with your AI teammates to complete the task. Current mode:{' '}
+                    <span className="font-semibold text-theme-text-main">
+                      {assessmentMode === 'assessment' ? 'Assessment' : 'Practice'}
+                    </span>
+                  </p>
+                </div>
               <button 
                 onClick={handleReset}
                 className="text-sm font-medium text-theme-text-muted hover:text-theme-text-main"
@@ -120,7 +181,7 @@ function App() {
                 Cancel
               </button>
             </div>
-            <ChatInterface task={selectedTask} onComplete={handleChatComplete} />
+            <ChatInterface task={selectedTask} assessmentMode={assessmentMode} onComplete={handleChatComplete} />
           </div>
         )}
 
@@ -139,7 +200,7 @@ function App() {
         )}
 
         {appState === 'REPORT' && assessmentResult && (
-          <AssessmentReport result={assessmentResult} onReset={handleReset} />
+          <AssessmentReport result={assessmentResult} skillHistory={skillHistory} onReset={handleReset} />
         )}
 
       </main>

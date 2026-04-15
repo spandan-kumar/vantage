@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Bot, Loader2 } from 'lucide-react';
-import { Message, Task } from '../types';
+import { Message, Task, AssessmentMode } from '../types';
 import { cn } from '../lib/utils';
 import { chatWithExecutiveLLM } from '../services/gemini';
 
 interface ChatInterfaceProps {
   task: Task;
+  assessmentMode: AssessmentMode;
   onComplete: (messages: Message[]) => void;
 }
 
-export default function ChatInterface({ task, onComplete }: ChatInterfaceProps) {
+export default function ChatInterface({ task, assessmentMode, onComplete }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +23,7 @@ export default function ChatInterface({ task, onComplete }: ChatInterfaceProps) 
       setIsLoading(true);
       setError(null);
       try {
-        const initialMessages = await chatWithExecutiveLLM([], task);
+        const initialMessages = await chatWithExecutiveLLM([], task, assessmentMode);
         setMessages(initialMessages);
       } catch (err) {
         console.error("Failed to initialize chat:", err);
@@ -32,7 +33,7 @@ export default function ChatInterface({ task, onComplete }: ChatInterfaceProps) 
       }
     };
     initChat();
-  }, [task]);
+  }, [task, assessmentMode]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -56,7 +57,7 @@ export default function ChatInterface({ task, onComplete }: ChatInterfaceProps) 
     setError(null);
 
     try {
-      const aiResponses = await chatWithExecutiveLLM(newMessages, task);
+      const aiResponses = await chatWithExecutiveLLM(newMessages, task, assessmentMode);
       setMessages([...newMessages, ...aiResponses]);
     } catch (err) {
       console.error("Failed to get AI response:", err);
@@ -65,6 +66,10 @@ export default function ChatInterface({ task, onComplete }: ChatInterfaceProps) 
       setIsLoading(false);
     }
   };
+
+  const userTurnCount = messages.filter((message) => message.isUser).length;
+  const minimumEvidenceMet = userTurnCount >= 4;
+  const canEvaluate = assessmentMode === 'practice' || minimumEvidenceMet;
 
   return (
     <div className="flex flex-col h-[600px] bg-theme-surface rounded-lg shadow-sm border border-theme-border overflow-hidden">
@@ -75,11 +80,17 @@ export default function ChatInterface({ task, onComplete }: ChatInterfaceProps) 
         </div>
         <button
           onClick={() => onComplete(messages)}
-          className="px-6 py-2.5 bg-theme-accent text-white text-sm font-semibold rounded-md hover:opacity-90 transition-colors border-none"
+          disabled={!canEvaluate}
+          className="px-6 py-2.5 bg-theme-accent text-white text-sm font-semibold rounded-md hover:opacity-90 transition-colors border-none disabled:opacity-50 disabled:cursor-not-allowed"
         >
           End & Evaluate
         </button>
       </div>
+      {!canEvaluate && (
+        <div className="px-4 py-2 text-xs text-theme-text-muted border-b border-theme-border bg-theme-bg">
+          Add at least {4 - userTurnCount} more user turn(s) to unlock a stable assessment.
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !isLoading && (
