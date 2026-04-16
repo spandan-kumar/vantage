@@ -1,101 +1,114 @@
-# Vantage Durable Skills Assessment: Product Decisions and Rationale
+# Vantage Durable Skills Assessment: Design Decisions, Rationale, and Sources
 
-Last updated: 2026-04-15
+Last updated: 2026-04-16
 
-## 1) Why we changed the assessment flow
+## 1) What this implementation now does
 
-The Google Vantage research emphasizes an adaptive "Executive LLM" that steers conversation toward high-density evidence for target skills, then an AI evaluator that scores against the same rubric [1][2].
+This system is now built as a full assessment pipeline rather than a one-shot scorer:
 
-In the current app, this translated into three concrete priorities:
+1. Turn-level evidence labeling for every user turn.
+2. Repeated scorer passes with aggregation and NA handling.
+3. Adaptive Executive policy loop for missing dimensions.
+4. Practice vs Assessment mode split with different facilitation behavior.
+5. Replayable artifacts with scorer/model/policy versioning.
+6. Longitudinal history, dimension trends, and next-scenario recommendations.
+7. Locale-aware rubric selection and calibration status checks.
+8. Internal rater + eval harness (agreement, evidence density, recovery tests, experiment profiles).
 
-1. Gather more useful behavioral evidence during the chat (not just free-form dialogue).
-2. Make scoring uncertainty visible (confidence, reliability, minimum evidence checks).
-3. Support growth, not just grading (practice mode + actionable development plan), aligned with Google's stated next step toward skill growth [1].
+## 2) Decision log
 
-## 2) Implemented decisions
+## A. Turn-level evidence first, then score aggregation
 
-## Decision A: Adaptive evidence coverage in chat orchestration
-
-What we implemented:
-- Added backend evidence-coverage analysis by skill dimension.
-- Added adaptive facilitation guidance so the teammate generator nudges conversation toward uncovered dimensions.
-- Added an explicit `assessmentMode` behavior split (`assessment` vs `practice`) in chat generation.
-
-Why:
-- The technical report describes the Executive LLM as explicitly steering for measurable evidence density while preserving natural interaction [2].
-- This improves observability and reduces random drift in open-ended chat.
-
-Tradeoff:
-- Heuristic coverage detection (keyword-based) is lightweight and interpretable, but not as robust as a learned evidence classifier.
-
-## Decision B: Minimum evidence gating before stable evaluation
-
-What we implemented:
-- In assessment mode, the UI blocks "End & Evaluate" until a minimum user-turn threshold is reached.
-- Backend reports `minimumEvidenceMet`, `uncoveredDimensions`, and reliability flags when evidence is sparse.
+Decision:
+- We label per-turn evidence before scoring.
+- Scoring uses multiple passes and aggregates at conversation level.
+- Dimensions can be marked NA when evidence is insufficient.
 
 Why:
-- The report frames assessment quality as evidence-dependent and explicitly contrasts informative vs non-informative interactions [2].
-- The Standards for Educational and Psychological Testing emphasize that interpretation quality depends on appropriate evidence and intended use [3].
+- The Google report emphasizes stronger signal from evidence-aware conversation analysis and supports NA semantics when evidence is weak [1][2].
+- Psychometric interpretation quality depends on validity evidence, not just one model output [3][4][5].
 
-Tradeoff:
-- Slightly longer assessment sessions, but better score stability and interpretability.
+Implementation details:
+- `labelTurnEvidence()` creates dimension-labeled turn evidence.
+- `runSingleScoringPass()` runs repeated scoring.
+- `aggregateScoringPasses()` computes final dimension scores, confidence, spread, and reliability flags.
 
-## Decision C: Confidence-aware multidimensional scoring output
+## B. Executive LLM as policy loop, not static prompting
 
-What we implemented:
-- Expanded result schema with per-dimension confidence, evidence count, next probe, and overall confidence.
-- Added NA handling for insufficient evidence.
-- Added reliability, validity, and fairness notes in the report payload.
-
-Why:
-- The Vantage report explicitly uses turn-level rating logic, NA outcomes, and agreement-based psychometric framing [2].
-- Validity should be treated as an evidence-backed interpretive argument, not a single metric [4][5].
-
-Tradeoff:
-- More complex output schema, but this supports auditability and better user trust.
-
-## Decision D: Fairness and risk surfacing in feedback
-
-What we implemented:
-- Added explicit fairness checks in evaluation output.
-- Added reliability/validity disclosures to communicate uncertainty and scope limits.
+Decision:
+- Executive behavior is now driven by policy state:
+  - uncovered dimensions
+  - user turn count
+  - targeted probes/challenges
+  - pressure tactics
+- It dynamically injects probe pressure while preserving mode constraints.
 
 Why:
-- NIST AI RMF identifies trustworthiness as including validity/reliability and fairness with harmful bias managed [6].
-- For high-impact educational signals, fairness statements and bias-risk visibility are a minimum responsible default.
+- The report frames this role as an orchestration mechanism for eliciting diagnostically useful evidence [2].
 
-Tradeoff:
-- Slightly denser report UI; mitigated via grouped sections.
+## C. Strict mode split: Practice vs Assessment
 
-## Decision E: Practice mode + longitudinal trend
-
-What we implemented:
-- Added mode switch in the app: `Assessment` (neutral facilitation) and `Practice` (coaching-oriented facilitation).
-- Added local longitudinal history (recent same-skill attempts) to visualize directional growth.
+Decision:
+- Assessment mode: neutral facilitation, stricter completion criteria.
+- Practice mode: one coaching cue per cycle, formative orientation.
 
 Why:
-- Google explicitly notes the next phase beyond assessment is skill growth through practice in simulated environments [1].
-- Repeated observations across sessions are more useful for growth than a single-point score.
+- Controlled assessment and formative practice have different validity and user-intent requirements [3].
+- Google’s write-up explicitly points from measurement toward growth-oriented practice [1].
 
-Tradeoff:
-- Local history is currently client-side only (not cross-device). Good for iteration speed, but not enterprise analytics.
+## D. Validity and fairness are first-class outputs
 
-## 3) What this does *not* solve yet
+Decision:
+- Reports include reliability flags, validity notes, fairness checks, and locale calibration status.
+- Prompt-injection / score-gaming signals are detected and surfaced.
 
-1. Human-rater calibration workflow: we still need periodic expert benchmarking against model ratings.
-2. Advanced psychometrics: no IRT/G-theory layer yet; current system is rubric + confidence + evidence diagnostics.
-3. Population-level fairness analytics: no cohort-level disparity dashboard yet.
-4. Transfer validation: simulation-to-real-world transfer is still an open research problem called out in [1][2].
+Why:
+- NIST AI RMF stresses validity, reliability, and fairness as trustworthiness properties [6].
+- High-stakes assessment should expose uncertainty and threats to validity [3][4].
 
-## 4) Recommended next implementation milestones
+## E. Versioned and replayable assessment artifacts
 
-1. Add a calibration set and periodic human-vs-model agreement tracking.
-2. Replace keyword evidence heuristics with a dedicated evidence-classification model.
-3. Add scenario-level blueprinting to guarantee balanced dimension coverage across tasks.
-4. Add organization-level analytics (distribution shift, drift, and subgroup fairness monitoring).
+Decision:
+- Every evaluation stores a replay artifact with:
+  - transcript
+  - turn evidence
+  - scoring pass outputs
+  - aggregate result
+  - scorer/policy/model versions
+  - scoring profile
+- Artifacts are retrievable by ID.
 
-## Sources
+Why:
+- This is essential for auditability, reproducibility, and experiment comparisons over time.
+
+## F. Longitudinal progression and recommendations
+
+Decision:
+- Per-user history is persisted server-side.
+- UI displays dimension trend lines.
+- Recommendations map weakest dimensions to next scenarios.
+
+Why:
+- A single report is noisy; longitudinal trajectories are more informative for durable skill growth [1][2].
+
+## G. Internal eval operations
+
+Decision:
+- Added scripts for:
+  - seed generation for 100–200 calibration conversations
+  - internal human rating capture
+  - eval harness with weighted kappa and recovery tests
+
+Why:
+- Human–human and human–LLM agreement plus stress tests are core to ongoing validation [2][3].
+
+## 3) Remaining practical constraints
+
+1. Locale-specific calibration still depends on collecting sufficient human ratings per locale.
+2. Model-level behavior still requires periodic recalibration after model updates.
+3. Recovery tests currently combine fixture checks and heuristic signal deltas; broader simulation coverage is recommended.
+
+## 4) Sources
 
 [1] Google Research Blog, "Towards developing future-ready skills with generative AI" (2026): https://research.google/blog/towards-developing-future-ready-skills-with-generative-ai/
 
@@ -105,6 +118,6 @@ Tradeoff:
 
 [4] Kane, M. (2013), "The Argument-Based Approach to Validation": https://www.ets.org/research/policy_research_reports/publications/article/2013/jrpe.html
 
-[5] Messick, S. (1994), "Validity of Psychological Assessment" (ETS report): https://files.eric.ed.gov/fulltext/ED380496.pdf
+[5] Messick, S. (1994), "Validity of Psychological Assessment": https://files.eric.ed.gov/fulltext/ED380496.pdf
 
 [6] NIST, *AI Risk Management Framework (AI RMF 1.0)* (2023): https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf

@@ -1,0 +1,17 @@
+[
+  {
+    "id": "default",
+    "label": "Balanced",
+    "description": "Primary production profile with moderate strictness and confidence calibration."
+  },
+  {
+    "id": "strict",
+    "label": "Strict",
+    "description": "Conservative scoring profile for high-stakes usage."
+  },
+  {
+    "id": "formative",
+    "label": "Formative",
+    "description": "Development-oriented profile for coaching and practice diagnostics."
+  }
+]

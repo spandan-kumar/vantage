@@ -1,20 +1,66 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Vantage Durable Skills Assessment
 
-# Run and deploy your AI Studio app
+Monolith deployment of an adaptive durable-skills assessment system inspired by Google's Vantage work.
 
-This contains everything you need to run your app locally.
+## What it includes
 
-View your app in AI Studio: https://ai.studio/apps/973cb0eb-d16a-47f3-8a30-a95e2918e286
+- Adaptive Executive policy loop that targets missing rubric dimensions.
+- Turn-level evidence labeling before scoring.
+- Multi-pass scorer aggregation with confidence, NA handling, and reliability flags.
+- Practice vs Assessment mode split.
+- Locale-aware rubric selection and locale calibration diagnostics.
+- Replayable scoring artifacts with scorer/model/policy versioning.
+- Per-user longitudinal history, dimension trends, and next-scenario recommendations.
+- Internal evaluation tooling (seed generation, human ratings, kappa harness).
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
+## Local development
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+
+```bash
+npm install
+```
+
+2. Configure environment:
+
+```bash
+cp .env.example .env
+```
+
+3. Start frontend dev server:
+
+```bash
+npm run dev
+```
+
+4. Start monolith API/server (serves `dist`):
+
+```bash
+npm run build
+npm start
+```
+
+## Core scripts
+
+```bash
+npm run lint
+npm run build
+npm run eval:seed
+npm run eval:rater -- list --limit 20
+npm run eval:harness
+```
+
+## API endpoints
+
+- `POST /api/chat`
+- `POST /api/evaluate`
+- `GET /api/history?userId=<id>&skill=<optional>`
+- `GET /api/recommendations?userId=<id>&locale=<locale>`
+- `GET /api/locale-calibration?locale=<locale>`
+- `GET /api/artifacts/:artifactId`
+- `POST /api/internal/human-rating`
+
+## Decision docs
+
+- `docs/assessment-decisions.md`
+- `docs/evaluation-operations.md`

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "collab-conflict-1",
+    "skill": "Collaboration",
+    "dimension": "Conflict Resolution",
+    "before": "User avoids disagreement and says just do whatever.",
+    "after": "User names the conflict, suggests compromise options, and asks teammates to align on a decision rule.",
+    "expectedDirection": "increase"
+  },
+  {
+    "id": "collab-plan-1",
+    "skill": "Collaboration",
+    "dimension": "Project Management",
+    "before": "User gives ideas but no plan, no roles, and no timeline.",
+    "after": "User sets milestones, assigns roles, and asks for progress checkpoints.",
+    "expectedDirection": "increase"
+  },
+  {
+    "id": "creative-ideas-1",
+    "skill": "Creativity",
+    "dimension": "Generating Ideas",
+    "before": "User suggests one common option only.",
+    "after": "User proposes four alternative ideas including one surprising but feasible option.",
+    "expectedDirection": "increase"
+  },
+  {
+    "id": "creative-eval-1",
+    "skill": "Creativity",
+    "dimension": "Evaluating Ideas",
+    "before": "User picks an idea with no criteria.",
+    "after": "User compares options by cost, feasibility, and impact before selecting.",
+    "expectedDirection": "increase"
+  },
+  {
+    "id": "critical-analyze-1",
+    "skill": "Critical Thinking",
+    "dimension": "Interpret and Analyze",
+    "before": "User repeats the claim without identifying assumptions.",
+    "after": "User identifies assumptions, clarifies terms, and asks for missing evidence.",
+    "expectedDirection": "increase"
+  },
+  {
+    "id": "critical-judge-1",
+    "skill": "Critical Thinking",
+    "dimension": "Evaluate and Judge",
+    "before": "User accepts conclusion because it sounds convincing.",
+    "after": "User separates correlation from causation, evaluates source credibility, and points out reasoning flaws.",
+    "expectedDirection": "increase"
+  }
+]

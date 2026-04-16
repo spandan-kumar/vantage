@@ -1,16 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Bot, Loader2 } from 'lucide-react';
-import { Message, Task, AssessmentMode } from '../types';
+import { Message, Task, AssessmentMode, LocaleCode, ScoringProfileId } from '../types';
 import { cn } from '../lib/utils';
 import { chatWithExecutiveLLM } from '../services/gemini';
 
 interface ChatInterfaceProps {
   task: Task;
   assessmentMode: AssessmentMode;
+  locale: LocaleCode;
+  userId: string;
+  sessionId: string;
+  scoringProfileId: ScoringProfileId;
   onComplete: (messages: Message[]) => void;
 }
 
-export default function ChatInterface({ task, assessmentMode, onComplete }: ChatInterfaceProps) {
+export default function ChatInterface({
+  task,
+  assessmentMode,
+  locale,
+  userId,
+  sessionId,
+  scoringProfileId,
+  onComplete,
+}: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +35,12 @@ export default function ChatInterface({ task, assessmentMode, onComplete }: Chat
       setIsLoading(true);
       setError(null);
       try {
-        const initialMessages = await chatWithExecutiveLLM([], task, assessmentMode);
+        const initialMessages = await chatWithExecutiveLLM([], task, assessmentMode, {
+          locale,
+          userId,
+          sessionId,
+          scoringProfileId,
+        });
         setMessages(initialMessages);
       } catch (err) {
         console.error("Failed to initialize chat:", err);
@@ -33,7 +50,7 @@ export default function ChatInterface({ task, assessmentMode, onComplete }: Chat
       }
     };
     initChat();
-  }, [task, assessmentMode]);
+  }, [task, assessmentMode, locale, userId, sessionId, scoringProfileId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -57,7 +74,12 @@ export default function ChatInterface({ task, assessmentMode, onComplete }: Chat
     setError(null);
 
     try {
-      const aiResponses = await chatWithExecutiveLLM(newMessages, task, assessmentMode);
+      const aiResponses = await chatWithExecutiveLLM(newMessages, task, assessmentMode, {
+        locale,
+        userId,
+        sessionId,
+        scoringProfileId,
+      });
       setMessages([...newMessages, ...aiResponses]);
     } catch (err) {
       console.error("Failed to get AI response:", err);

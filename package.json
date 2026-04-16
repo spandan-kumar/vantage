@@ -9,7 +9,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "eval:harness": "node scripts/eval-harness.mjs",
+    "eval:rater": "node scripts/rater-tool.mjs",
+    "eval:seed": "node scripts/simulate-calibration-set.mjs --count 120"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

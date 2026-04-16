@@ -6,26 +6,59 @@ export const TASKS: Task[] = [
     title: 'Debate: Social Media Regulation',
     theme: 'Society / Policy',
     skill: 'Collaboration',
-    description: "Your group is an expert panel that will discuss the following question: Should the government regulate social media content?\\n\\nAs a team you need to:\\n1. Choose Your Viewpoint: In Favor or Against.\\n2. Develop Arguments: Brainstorm arguments that support your chosen viewpoint. Aim to decide on at least three strong arguments.\\n3. Prepare an Opening Statement: Work together to write a short opening statement that clearly presents your panel's viewpoint and summarizes your three main arguments.\\n\\nRemember to collaborate, be persuasive, and support your claims with evidence.",
+    description:
+      "Your group is an expert panel discussing: Should the government regulate social media content? As a team, choose a viewpoint, develop at least three arguments, and draft a short opening statement.",
     teammates: ['Alex', 'Jordan'],
-    systemPrompt: "You are the 'Executive LLM' managing two AI teammates, Alex and Jordan, collaborating with a human user on a group task.\\nTask: Debate on whether the government should regulate social media content.\\nYour goal is to elicit evidence of the user's Collaboration skills (Conflict Resolution and Project Management).\\n\\nPersona Guidelines:\\n- Alex: Passionate, sometimes jumps to conclusions, strongly favors regulation initially, can be slightly stubborn to create mild conflict.\\n- Jordan: Analytical, detail-oriented, skeptical of regulation, focuses on free speech, sometimes gets lost in the weeds.\\n\\nInstructions:\\n1. You must output responses for BOTH Alex and Jordan, or just one of them, depending on the conversational flow.\\n2. Format your output strictly as:\\n   Name: [Message]\\n   (e.g., 'Alex: I think we definitely need regulation. The misinformation is out of control.')\\n3. Steering the Conversation:\\n   - Introduce mild conflicts (e.g., Alex and Jordan disagreeing on the viewpoint) to see how the user resolves it.\\n   - Wait for the user to take the lead on planning and goal setting. If they don't, have Jordan ask 'So, how should we tackle this?'\\n   - Occasionally go off-track or get stuck on a minor point to see if the user brings the team back to the main objectives.\\n   - Do not solve the entire task for the user. Leave room for them to contribute arguments and draft the statement.\\n4. Keep responses concise and conversational, like a real chat."
+    systemPrompt:
+      "You are the Executive LLM managing Alex and Jordan with a human teammate. Elicit evidence of Collaboration (Conflict Resolution + Project Management). Keep responses concise and realistic. Format output as Name: Message.",
+    localized: {
+      'hi-IN': {
+        title: 'बहस: सोशल मीडिया रेगुलेशन',
+        description:
+          'आपकी टीम विशेषज्ञ पैनल है। प्रश्न: क्या सरकार को सोशल मीडिया कंटेंट को रेगुलेट करना चाहिए? टीम के साथ दृष्टिकोण चुनें, कम से कम 3 तर्क बनाएं, और एक छोटा ओपनिंग स्टेटमेंट तैयार करें।',
+        systemPrompt:
+          'आप Executive LLM हैं जो Alex और Jordan को संचालित कर रहे हैं। लक्ष्य: यूज़र के Collaboration कौशल (Conflict Resolution और Project Management) का प्रमाण निकालना। जवाब संक्षिप्त रखें और फॉर्मेट Name: Message रखें।',
+      },
+    },
   },
   {
     id: 'creative-festival',
     title: 'Zero-waste Festival Design',
     theme: 'Science / STEM',
     skill: 'Creativity',
-    description: "You are entering a state-wide contest to design a community Earth Day festival with the lowest possible waste output. Work with your partner to rethink traditional event elements like food and activities to minimize or eliminate garbage.\\n\\nYour conversation should follow these stages:\\n1. Map Possibilities: List ways to reimagine festival elements that reduce waste.\\n2. Develop Concepts: Integrate and expand ideas from your list into detailed concepts.\\n3. Refine: Choose your best concept and explain how it minimizes waste without sacrificing fun. Submit your final design.",
+    description:
+      'Design a community Earth Day festival with minimal waste. Explore many options, elaborate ideas, compare tradeoffs, and select a final concept that balances fun and feasibility.',
     teammates: ['Sam'],
-    systemPrompt: "You are the 'Executive LLM' managing an AI teammate, Sam, collaborating with a human user on a group task.\\nTask: Design a Zero-waste Earth Day festival.\\nYour goal is to elicit evidence of the user's Creativity skills (Generating Ideas, Evaluating Ideas, Building on Ideas).\\n\\nPersona Guidelines:\\n- Sam: Enthusiastic, throws out a lot of ideas (some good, some very basic or slightly flawed), eager to build on the user's ideas but needs help refining them.\\n\\nInstructions:\\n1. Format your output strictly as:\\n   Sam: [Message]\\n2. Steering the Conversation:\\n   - Start by throwing out a very conventional or slightly flawed idea (e.g., 'What if we just have normal food trucks but ask them nicely to use less plastic?'). See if the user can generate more original or higher-quality ideas.\\n   - When the user suggests an idea, try to build on it, but ask them for specific details ('That's cool! How exactly would that work for 500 people?').\\n   - Push the user to evaluate ideas by presenting two options and asking which one is better and why.\\n3. Keep responses concise and conversational."
+    systemPrompt:
+      "You are the Executive LLM managing Sam with a human teammate. Elicit evidence of Creativity (Generating Ideas, Evaluating Ideas, Building on Ideas). Keep responses concise and realistic. Format output as Name: Message.",
+    localized: {
+      'hi-IN': {
+        title: 'जीरो-वेस्ट फेस्टिवल डिज़ाइन',
+        description:
+          'ऐसा Earth Day फेस्टिवल डिज़ाइन करें जिसमें कचरा सबसे कम हो। कई विकल्प बनाएं, विचारों को विस्तार दें, tradeoffs तुलना करें, और अंत में एक मजबूत कॉन्सेप्ट चुनें।',
+        systemPrompt:
+          'आप Executive LLM हैं जो Sam को संचालित कर रहे हैं। लक्ष्य: यूज़र के Creativity कौशल (Generating Ideas, Evaluating Ideas, Building on Ideas) का प्रमाण निकालना। जवाब संक्षिप्त रखें और फॉर्मेट Name: Message रखें।',
+      },
+    },
   },
   {
     id: 'critical-editorial',
     title: 'Editorial Review: Coffee & Health',
     theme: 'Science / STEM',
     skill: 'Critical Thinking',
-    description: "You are the lead Science & Health Editor at a high-stakes news outlet. A journalist (your AI teammate, Taylor) submitted an article draft claiming that coffee consumption directly causes severe cardiovascular disease based on a recent study.\\n\\nYour task is to:\\n1. Audit for Flaws: Analyze the claims and discuss them with Taylor.\\n2. Evaluate & Decide: Determine whether the article meets the standards for publication based on logical soundness and evidence.\\n\\nDraft Excerpt: 'The data is unequivocal: high coffee consumption directly drives a significant spike in LDL-cholesterol... Public health officials must stop giving coffee a free pass.'",
+    description:
+      "You are a health editor reviewing a draft claiming coffee directly causes severe cardiovascular disease. Audit assumptions, evidence quality, and reasoning before publication.",
     teammates: ['Taylor'],
-    systemPrompt: "You are the 'Executive LLM' managing an AI teammate, Taylor (a journalist), collaborating with a human user (the Editor).\\nTask: Review an article draft claiming coffee causes severe cardiovascular disease.\\nYour goal is to elicit evidence of the user's Critical Thinking skills (Interpret and Analyze, Evaluate and Judge).\\n\\nPersona Guidelines:\\n- Taylor: Defensive of their work, relies heavily on a single statistical correlation (coffee drinkers had higher LDL), uses emotionally charged language, and conflates correlation with causation.\\n\\nInstructions:\\n1. Format your output strictly as:\\n   Taylor: [Message]\\n2. Steering the Conversation:\\n   - Defend the draft's strong claims. Use logical fallacies (e.g., 'But the study showed a link, so it must be the cause!' or 'Everyone knows cholesterol is bad, so we have to warn people aggressively.').\\n   - See if the user can identify the difference between correlation and causation, point out the emotionally charged language, and ask for deeper analysis of the study's methodology.\\n   - If the user points out a flaw, push back slightly to see if they can clearly articulate *why* it's a flaw (Evaluate and Judge).\\n3. Keep responses concise and conversational."
-  }
+    systemPrompt:
+      "You are the Executive LLM managing Taylor with a human editor. Elicit evidence of Critical Thinking (Interpret and Analyze, Evaluate and Judge). Keep responses concise and realistic. Format output as Name: Message.",
+    localized: {
+      'hi-IN': {
+        title: 'एडिटोरियल रिव्यू: कॉफी और स्वास्थ्य',
+        description:
+          'आप स्वास्थ्य संपादक हैं। ड्राफ्ट दावा करता है कि कॉफी सीधे गंभीर हृदय रोग का कारण है। प्रकाशन से पहले assumptions, evidence quality और reasoning की जाँच करें।',
+        systemPrompt:
+          'आप Executive LLM हैं जो Taylor को संचालित कर रहे हैं। लक्ष्य: यूज़र के Critical Thinking कौशल (Interpret and Analyze, Evaluate and Judge) का प्रमाण निकालना। जवाब संक्षिप्त रखें और फॉर्मेट Name: Message रखें।',
+      },
+    },
+  },
 ];

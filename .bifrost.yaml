@@ -1,0 +1,12 @@
+api_base_url: https://api.bifrost.saastack.site
+project_id: ca62bc5b-b06a-4993-936c-33d377e7e0d5
+project_name: ca62bc5b-b06a-4993-936c-33d377e7e0d5
+service_id: 90f65855-005e-46a9-9446-e46f6276aa4e
+service_name: web
+environment_id: ea761248-6611-43e0-b813-b5581ec29d7c
+environment_name: dev
+repository_url: git@appointy:spandan-appointy/vantage-durable-skills-assessment.git
+default_branch: main
+root_directory: .
+dockerfile_path: Dockerfile
+docker_context: .
