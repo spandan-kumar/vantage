@@ -8,8 +8,8 @@ import {
   LocaleCode,
   Recommendation,
   ScoringProfileId,
-  UserHistoryResponse,
   RecommendationResponse,
+  SessionHistoryResponse,
 } from "../types";
 
 type ApiError = {
@@ -21,6 +21,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 async function postJson<T>(path: string, body: unknown): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -44,6 +45,7 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
 async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "GET",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -88,11 +90,16 @@ export async function evaluateTranscript(
   return postJson<AssessmentResult>("/api/evaluate", { messages, task, assessmentMode, ...context });
 }
 
-export async function fetchAssessmentHistory(userId: string, skill?: string): Promise<HistorySession[]> {
-  const query = new URLSearchParams({ userId });
+export async function fetchSessionHistory(userId?: string, skill?: string): Promise<HistorySession[]> {
+  const query = new URLSearchParams();
+  if (userId) query.set("userId", userId);
   if (skill) query.set("skill", skill);
-  const response = await getJson<UserHistoryResponse>(`/api/history?${query.toString()}`);
+  const response = await getJson<SessionHistoryResponse>(`/api/sessions${query.toString() ? `?${query.toString()}` : ""}`);
   return response.sessions;
+}
+
+export async function fetchAssessmentHistory(userId: string, skill?: string): Promise<HistorySession[]> {
+  return fetchSessionHistory(userId, skill);
 }
 
 export async function fetchRecommendations(userId: string, locale: LocaleCode): Promise<Recommendation[]> {

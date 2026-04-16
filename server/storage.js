@@ -5,6 +5,9 @@ const ROOT_DIR = process.cwd();
 const DATA_DIR = path.join(ROOT_DIR, "data", "runtime");
 const ARTIFACT_DIR = path.join(DATA_DIR, "artifacts");
 const HISTORY_DIR = path.join(DATA_DIR, "history");
+const AUTH_DIR = path.join(DATA_DIR, "auth");
+const USERS_FILE = path.join(AUTH_DIR, "users.json");
+const AUTH_SESSIONS_FILE = path.join(AUTH_DIR, "sessions.json");
 const HUMAN_RATINGS_FILE = path.join(DATA_DIR, "human-ratings.jsonl");
 
 async function ensureDir(dirPath) {
@@ -68,6 +71,66 @@ export async function getUserHistory(userId) {
   const safeUserId = userId || "anonymous";
   const historyFile = path.join(HISTORY_DIR, `${safeUserId}.json`);
   return readJson(historyFile, []);
+}
+
+export async function loadAuthUsers() {
+  return readJson(USERS_FILE, []);
+}
+
+export async function saveAuthUsers(users) {
+  await writeJson(USERS_FILE, users);
+  return users;
+}
+
+export async function loadAuthSessions() {
+  return readJson(AUTH_SESSIONS_FILE, []);
+}
+
+export async function saveAuthSessions(sessions) {
+  await writeJson(AUTH_SESSIONS_FILE, sessions);
+  return sessions;
+}
+
+export async function findAuthUserByEmail(email) {
+  const users = await loadAuthUsers();
+  return users.find((user) => user.email === email) || null;
+}
+
+export async function findAuthUserById(userId) {
+  const users = await loadAuthUsers();
+  return users.find((user) => user.id === userId) || null;
+}
+
+export async function upsertAuthUser(user) {
+  const users = await loadAuthUsers();
+  const index = users.findIndex((item) => item.id === user.id);
+  const nextUsers = index >= 0 ? [...users.slice(0, index), user, ...users.slice(index + 1)] : [user, ...users];
+  await saveAuthUsers(nextUsers);
+  return user;
+}
+
+export async function createAuthSession(session) {
+  const sessions = await loadAuthSessions();
+  const nextSessions = [session, ...sessions].slice(0, 500);
+  await saveAuthSessions(nextSessions);
+  return session;
+}
+
+export async function updateAuthSession(sessionId, patch) {
+  const sessions = await loadAuthSessions();
+  const nextSessions = sessions.map((session) => (session.id === sessionId ? { ...session, ...patch } : session));
+  await saveAuthSessions(nextSessions);
+  return nextSessions.find((session) => session.id === sessionId) || null;
+}
+
+export async function findAuthSessionById(sessionId) {
+  const sessions = await loadAuthSessions();
+  return sessions.find((session) => session.id === sessionId) || null;
+}
+
+export async function listAuthSessionsForUser(userId) {
+  const sessions = await loadAuthSessions();
+  return sessions.filter((session) => session.userId === userId);
 }
 
 export async function saveHumanRating(rating) {

@@ -16,6 +16,7 @@ interface TrendSeries {
 interface AssessmentReportProps {
   result: AssessmentResult;
   skillHistory: HistorySession[];
+  sessionHistory: HistorySession[];
   dimensionTrends: TrendSeries[];
   recommendations: Recommendation[];
   localeCalibration: LocaleCalibrationSummary | null;
@@ -56,6 +57,7 @@ function TrendLine({ points }: { points: Array<{ score: number | 'NA' }> }) {
 export default function AssessmentReport({
   result,
   skillHistory,
+  sessionHistory,
   dimensionTrends,
   recommendations,
   localeCalibration,
@@ -282,6 +284,37 @@ export default function AssessmentReport({
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <h3 className="font-semibold text-theme-text-main">Session History</h3>
+          <span className="text-xs uppercase tracking-widest text-theme-text-muted">
+            {sessionHistory.length} recorded session{sessionHistory.length === 1 ? '' : 's'}
+          </span>
+        </div>
+        {sessionHistory.length === 0 ? (
+          <p className="text-sm text-theme-text-muted">No sessions recorded yet for this account.</p>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {sessionHistory.slice(0, 6).map((session) => (
+              <div key={session.id} className="rounded-xl border border-theme-border bg-theme-bg p-3 text-sm">
+                <div className="font-semibold text-theme-text-main">{session.taskTitle}</div>
+                <div className="text-xs text-theme-text-muted mt-1">
+                  {session.createdAt.slice(0, 10)} | {session.assessmentMode} | {session.locale}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <span className="rounded-full bg-white px-2 py-1 text-xs text-theme-text-main border border-theme-border">
+                    {session.overallScore === 'NA' ? 'No evidence' : `Score ${session.overallScore}`}
+                  </span>
+                  <span className="rounded-full bg-white px-2 py-1 text-xs text-theme-text-main border border-theme-border">
+                    {Math.round(session.overallConfidence * 100)}% confidence
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">

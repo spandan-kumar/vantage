@@ -11,20 +11,24 @@ import {
   HistorySession,
   Recommendation,
   LocaleCalibrationResponse,
+  AuthUser,
 } from './types';
+import AuthScreen from './components/AuthScreen';
 import ChatInterface from './components/ChatInterface';
 import AssessmentReport from './components/AssessmentReport';
 import {
   evaluateTranscript,
-  fetchAssessmentHistory,
   fetchLocaleCalibration,
   fetchRecommendations,
+  fetchSessionHistory,
 } from './services/gemini';
+import { fetchCurrentUser, signIn, signOut, signUp } from './services/auth';
 import { BrainCircuit, Users, Lightbulb, FileText, Loader2 } from 'lucide-react';
 
 type AppState = 'SELECTION' | 'CHAT' | 'EVALUATING' | 'REPORT';
 
 const USER_ID_STORAGE_KEY = 'vantage-user-id-v2';
+const AUTH_MODE_STORAGE_KEY = 'vantage-auth-mode-v2';
 
 function makeId() {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -60,16 +64,22 @@ function App() {
   const [scoringProfileId, setScoringProfileId] = useState<ScoringProfileId>('default');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [assessmentResult, setAssessmentResult] = useState<AssessmentResult | null>(null);
-  const [userId] = useState<string>(() => getOrCreateUserId());
+  const [authReady, setAuthReady] = useState(false);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [authMode, setAuthMode] = useState<'guest' | 'signed-out'>('signed-out');
+  const [guestUserId] = useState<string>(() => getOrCreateUserId());
   const [sessionId, setSessionId] = useState<string>(() => makeId());
   const [history, setHistory] = useState<HistorySession[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [calibration, setCalibration] = useState<LocaleCalibrationResponse | null>(null);
 
+  const effectiveUserId = authUser?.id || guestUserId;
+  const isAuthenticated = Boolean(authUser);
+
   const hydrateInsights = async (skill?: SkillCategory) => {
     const [nextHistory, nextRecommendations] = await Promise.all([
-      fetchAssessmentHistory(userId, skill),
-      fetchRecommendations(userId, locale),
+      fetchSessionHistory(effectiveUserId, skill),
+      fetchRecommendations(effectiveUserId, locale),
     ]);
     setHistory(nextHistory);
     setRecommendations(nextRecommendations);
@@ -78,20 +88,39 @@ function App() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [localeCalibration, allHistory, nextRecommendations] = await Promise.all([
-          fetchLocaleCalibration(locale),
-          fetchAssessmentHistory(userId),
-          fetchRecommendations(userId, locale),
-        ]);
+        const mode = window.localStorage.getItem(AUTH_MODE_STORAGE_KEY);
+        if (mode === 'guest') {
+          setAuthMode('guest');
+        }
+        const currentUser = await fetchCurrentUser();
+        if (currentUser.authenticated && currentUser.user) {
+          setAuthUser(currentUser.user);
+          setAuthMode('signed-out');
+        } else if (mode === 'guest') {
+          setAuthUser(null);
+        }
+        const localeCalibration = await fetchLocaleCalibration(locale);
         setCalibration(localeCalibration);
-        setHistory(allHistory);
-        setRecommendations(nextRecommendations);
       } catch (error) {
         console.error('Failed to load user analytics:', error);
+      } finally {
+        setAuthReady(true);
       }
     };
     load();
-  }, [locale, userId]);
+  }, [guestUserId, locale]);
+
+  useEffect(() => {
+    if (!authReady) return;
+    const loadInsights = async () => {
+      try {
+        await hydrateInsights(assessmentResult?.skill);
+      } catch (error) {
+        console.error('Failed to refresh insights:', error);
+      }
+    };
+    loadInsights();
+  }, [authReady, assessmentResult?.skill, effectiveUserId, locale]);
 
   const handleStartTask = (task: Task) => {
     setSelectedTask(task);
@@ -106,7 +135,7 @@ function App() {
     try {
       const result = await evaluateTranscript(messages, selectedTask, assessmentMode, {
         locale,
-        userId,
+        userId: effectiveUserId,
         sessionId,
         scoringProfileId,
       });
@@ -125,6 +154,56 @@ function App() {
     setSelectedTask(null);
     setAssessmentResult(null);
     setSessionId(makeId());
+  };
+
+  const handleSignIn = async (email: string, password: string) => {
+    const response = await signIn(email, password);
+    if (!response.user) {
+      throw new Error('Could not load your account.');
+    }
+    setAuthUser(response.user);
+    setAuthMode('signed-out');
+    window.localStorage.removeItem(AUTH_MODE_STORAGE_KEY);
+    setAppState('SELECTION');
+    setAssessmentResult(null);
+    setSelectedTask(null);
+  };
+
+  const handleSignUp = async (displayName: string, email: string, password: string) => {
+    const response = await signUp(email, password, displayName);
+    if (!response.user) {
+      throw new Error('Could not create your account.');
+    }
+    setAuthUser(response.user);
+    setAuthMode('signed-out');
+    window.localStorage.removeItem(AUTH_MODE_STORAGE_KEY);
+    setAppState('SELECTION');
+    setAssessmentResult(null);
+    setSelectedTask(null);
+  };
+
+  const handleGuest = () => {
+    setAuthUser(null);
+    setAuthMode('guest');
+    window.localStorage.setItem(AUTH_MODE_STORAGE_KEY, 'guest');
+    setAppState('SELECTION');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Failed to sign out cleanly:', error);
+    } finally {
+      setAuthUser(null);
+      setAuthMode('signed-out');
+      window.localStorage.removeItem(AUTH_MODE_STORAGE_KEY);
+      setAssessmentResult(null);
+      setSelectedTask(null);
+      setAppState('SELECTION');
+      setHistory([]);
+      setRecommendations([]);
+    }
   };
 
   const skillHistory = useMemo(() => {
@@ -165,6 +244,7 @@ function App() {
   }, [assessmentResult, recommendations]);
 
   const localizedTasks = useMemo(() => TASKS.map((task) => localizeTask(task, locale)), [locale]);
+  const currentSessions = useMemo(() => [...history].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))), [history]);
 
   const getSkillIcon = (skill: string) => {
     switch (skill) {
@@ -187,17 +267,40 @@ function App() {
             <BrainCircuit size={20} />
             <h1 className="text-xl font-bold tracking-tight">Vantage Skills Assessment</h1>
           </div>
+          {authReady && (
+            <div className="flex items-center gap-3 text-sm">
+              <span className="rounded-full bg-white/10 px-3 py-1">
+                {isAuthenticated ? authUser?.displayName || authUser?.email : authMode === 'guest' ? 'Guest mode' : 'Not signed in'}
+              </span>
+              {isAuthenticated && (
+                <button onClick={handleLogout} className="rounded-full bg-white/10 px-3 py-1 font-medium hover:bg-white/20">
+                  Sign out
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
-        {appState === 'SELECTION' && (
+        {!authReady ? (
+          <div className="flex items-center justify-center min-h-[70vh]">
+            <Loader2 size={32} className="text-theme-accent animate-spin" />
+          </div>
+        ) : !isAuthenticated && authMode === 'signed-out' ? (
+          <AuthScreen onSignIn={handleSignIn} onSignUp={handleSignUp} onGuest={handleGuest} />
+        ) : appState === 'SELECTION' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center max-w-3xl mx-auto space-y-4">
               <h2 className="text-4xl font-extrabold tracking-tight text-theme-text-main">Measure Your Durable Skills</h2>
               <p className="text-lg text-theme-text-muted">
                 Engage in simulated group tasks with AI teammates. The Executive LLM adapts probes for missing evidence,
                 while the evaluator performs multi-pass scoring with confidence and reliability diagnostics.
+              </p>
+              <p className="text-sm text-theme-text-muted">
+                {isAuthenticated
+                  ? `Signed in as ${authUser?.displayName || authUser?.email}. Your session history is stored on the server.`
+                  : 'You are in guest mode. Sign in to keep your session history across devices.'}
               </p>
               <div className="grid sm:grid-cols-3 gap-3 text-left">
                 <div className="bg-theme-surface border border-theme-border rounded-md p-3">
@@ -270,6 +373,40 @@ function App() {
                 </div>
               ))}
             </div>
+
+            <div className="bg-theme-surface border border-theme-border rounded-xl p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-theme-text-main">Recent Sessions</h3>
+                  <p className="text-sm text-theme-text-muted">Your latest assessment runs and confidence levels.</p>
+                </div>
+                <span className="text-xs uppercase tracking-widest text-theme-text-muted">
+                  {currentSessions.length} total
+                </span>
+              </div>
+              {currentSessions.length === 0 ? (
+                <p className="text-sm text-theme-text-muted">No sessions yet. Start a scenario to create your first record.</p>
+              ) : (
+                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
+                  {currentSessions.slice(0, 6).map((session) => (
+                    <div key={session.id} className="rounded-xl border border-theme-border bg-theme-bg p-4 text-sm">
+                      <div className="font-semibold text-theme-text-main">{session.taskTitle}</div>
+                      <div className="text-xs text-theme-text-muted mt-1">
+                        {session.createdAt.slice(0, 10)} | {session.assessmentMode} | {session.skill}
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <span className="rounded-full bg-white px-2 py-1 text-xs text-theme-text-main border border-theme-border">
+                          {session.overallScore === 'NA' ? 'No evidence' : `Score ${session.overallScore}`}
+                        </span>
+                        <span className="rounded-full bg-white px-2 py-1 text-xs text-theme-text-main border border-theme-border">
+                          {Math.round(session.overallConfidence * 100)}% confidence
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -291,7 +428,7 @@ function App() {
               task={selectedTask}
               assessmentMode={assessmentMode}
               locale={locale}
-              userId={userId}
+              userId={effectiveUserId}
               sessionId={sessionId}
               scoringProfileId={scoringProfileId}
               onComplete={handleChatComplete}
@@ -317,6 +454,7 @@ function App() {
           <AssessmentReport
             result={assessmentResult}
             skillHistory={skillHistory}
+            sessionHistory={currentSessions}
             dimensionTrends={dimensionTrends}
             recommendations={scopedRecommendations}
             localeCalibration={calibration?.selected ?? null}

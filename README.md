@@ -11,6 +11,8 @@ Monolith deployment of an adaptive durable-skills assessment system inspired by 
 - Locale-aware rubric selection and locale calibration diagnostics.
 - Replayable scoring artifacts with scorer/model/policy versioning.
 - Per-user longitudinal history, dimension trends, and next-scenario recommendations.
+- Cookie-based auth with server-side account sessions.
+- Session history tied to authenticated accounts or guest mode.
 - Internal evaluation tooling (seed generation, human ratings, kappa harness).
 
 ## Local development
@@ -54,7 +56,12 @@ npm run eval:harness
 
 - `POST /api/chat`
 - `POST /api/evaluate`
+- `GET /api/auth/me`
+- `POST /api/auth/signup`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
 - `GET /api/history?userId=<id>&skill=<optional>`
+- `GET /api/sessions?userId=<id>&skill=<optional>`
 - `GET /api/recommendations?userId=<id>&locale=<locale>`
 - `GET /api/locale-calibration?locale=<locale>`
 - `GET /api/artifacts/:artifactId`

@@ -12,8 +12,9 @@ This system is now built as a full assessment pipeline rather than a one-shot sc
 4. Practice vs Assessment mode split with different facilitation behavior.
 5. Replayable artifacts with scorer/model/policy versioning.
 6. Longitudinal history, dimension trends, and next-scenario recommendations.
-7. Locale-aware rubric selection and calibration status checks.
-8. Internal rater + eval harness (agreement, evidence density, recovery tests, experiment profiles).
+7. Cookie-based auth and account-backed session history.
+8. Locale-aware rubric selection and calibration status checks.
+9. Internal rater + eval harness (agreement, evidence density, recovery tests, experiment profiles).
 
 ## 2) Decision log
 
@@ -91,7 +92,18 @@ Decision:
 Why:
 - A single report is noisy; longitudinal trajectories are more informative for durable skill growth [1][2].
 
-## G. Internal eval operations
+## G. Authenticated account sessions
+
+Decision:
+- We use server-issued, signed HTTP-only cookies to identify users.
+- Assessment history and session logs are attached to the authenticated account when available.
+- Guest mode still exists for exploration, but signed-in users keep history across devices.
+
+Why:
+- A durable-skill product needs persistent accounts so session history and progression are portable rather than tied to browser storage.
+- Signed cookies keep credentials off the client while still supporting the single-service monolith design.
+
+## H. Internal eval operations
 
 Decision:
 - Added scripts for:

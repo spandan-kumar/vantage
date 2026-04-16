@@ -3,6 +3,27 @@ export type AssessmentMode = 'assessment' | 'practice';
 export type LocaleCode = 'en-IN' | 'en-US' | 'hi-IN';
 export type ScoringProfileId = 'default' | 'strict' | 'formative';
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  displayName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthSessionInfo {
+  id: string;
+  createdAt: string;
+  lastUsedAt: string;
+  expiresAt: string;
+}
+
+export interface AuthMeResponse {
+  authenticated: boolean;
+  user: AuthUser | null;
+  session: AuthSessionInfo | null;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -142,6 +163,10 @@ export interface HistorySession {
 }
 
 export interface UserHistoryResponse {
+  sessions: HistorySession[];
+}
+
+export interface SessionHistoryResponse {
   sessions: HistorySession[];
 }
 
