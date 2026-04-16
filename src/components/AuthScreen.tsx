@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Loader2, Lock, UserRound, Sparkles } from 'lucide-react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { cn } from '../lib/utils';
 
 type AuthMode = 'login' | 'signup';
 
@@ -34,153 +37,143 @@ export default function AuthScreen({ onSignIn, onSignUp, onGuest }: AuthScreenPr
   };
 
   return (
-    <div className="min-h-[calc(100vh-12rem)] grid lg:grid-cols-[1.1fr_0.9fr] gap-8 items-stretch animate-in fade-in slide-in-from-bottom-8 duration-700">
-      <section className="rounded-[2.5rem] bg-theme-surface-container-low ambient-shadow p-10 lg:p-16 flex flex-col justify-between overflow-hidden relative group">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_left,_rgba(83,66,214,0.08),_transparent_50%)] pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-64 h-64 brand-gradient opacity-[0.03] rounded-full blur-[80px] pointer-events-none" />
-        
-        <div className="space-y-8 max-w-xl relative z-10">
-          <div className="inline-flex items-center gap-2.5 rounded-full bg-theme-surface-container-lowest px-4 py-1.5 text-[10px] font-bold tracking-[0.2em] uppercase text-theme-primary shadow-sm border border-theme-border/10">
-            <Sparkles size={14} className="animate-pulse" />
-            Durable Skills Framework
+    <div className="min-h-[calc(100vh-4rem)] grid lg:grid-cols-[1.2fr_0.8fr] gap-6 items-stretch">
+      <section className="rounded-3xl bg-[radial-gradient(circle_at_top_left,_rgba(43,108,176,0.18),_transparent_40%),linear-gradient(145deg,_#ffffff,_#eef4fb)] border border-theme-border shadow-sm p-8 lg:p-12 flex flex-col justify-between overflow-hidden">
+        <div className="space-y-6 max-w-xl">
+          <div className="inline-flex items-center gap-2 rounded-full border border-theme-border bg-white/70 px-3 py-1 text-xs font-semibold tracking-widest uppercase text-theme-text-muted">
+            <Sparkles size={14} className="text-theme-accent" />
+            Durable skills assessment
           </div>
-          <div className="space-y-6">
-            <h1 className="display-md text-theme-text-main">
-              Master the future of work <br />
-              <span className="text-transparent bg-clip-text brand-gradient">with evidence-based insights.</span>
+          <div className="space-y-4">
+            <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-theme-primary">
+              Sign in to keep your sessions, scores, and progression in one place.
             </h1>
-            <p className="text-lg text-theme-text-muted max-w-lg leading-relaxed">
-              Your account synchronizes your assessment trajectory across devices, providing a unified view of your skill evolution and AI-generated development plans.
+            <p className="text-lg text-theme-text-muted max-w-lg">
+              Your account stores assessment history server-side, so you can revisit prior sessions, compare trends, and
+              continue where you left off across devices.
             </p>
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-6 mt-16 relative z-10">
-          <div className="rounded-[1.5rem] bg-theme-surface-container-lowest p-6 shadow-sm border border-theme-border/5 group-hover:translate-y-[-4px] transition-transform duration-300">
-            <div className="w-8 h-8 rounded-lg bg-theme-primary/5 flex items-center justify-center mb-4 text-theme-primary">
-              <Sparkles size={18} />
-            </div>
-            <div className="font-bold text-theme-text-main text-sm mb-1">Evidence Trajectory</div>
-            <div className="text-theme-text-muted text-[13px] leading-relaxed">Longitudinal tracking of skill progression over multiple sessions.</div>
+        <div className="grid sm:grid-cols-3 gap-3 mt-10 text-sm">
+          <div className="rounded-2xl border border-theme-border bg-white/80 p-4">
+            <div className="font-semibold text-theme-text-main">Account-backed history</div>
+            <div className="text-theme-text-muted mt-1">Sessions stay attached to your profile instead of local storage.</div>
           </div>
-          <div className="rounded-[1.5rem] bg-theme-surface-container-lowest p-6 shadow-sm border border-theme-border/5 group-hover:translate-y-[-4px] transition-transform duration-300 delay-75">
-            <div className="w-8 h-8 rounded-lg bg-theme-secondary/5 flex items-center justify-center mb-4 text-theme-secondary">
-              <Lock size={18} />
-            </div>
-            <div className="font-bold text-theme-text-main text-sm mb-1">Encrypted Identity</div>
-            <div className="text-theme-text-muted text-[13px] leading-relaxed">Secure, enterprise-grade authentication for your assessment data.</div>
+          <div className="rounded-2xl border border-theme-border bg-white/80 p-4">
+            <div className="font-semibold text-theme-text-main">Private by default</div>
+            <div className="text-theme-text-muted mt-1">Auth uses signed HTTP-only cookies for browser sessions.</div>
           </div>
-          <div className="rounded-[1.5rem] bg-theme-surface-container-lowest p-6 shadow-sm border border-theme-border/5 group-hover:translate-y-[-4px] transition-transform duration-300 delay-150">
-            <div className="w-8 h-8 rounded-lg bg-theme-accent-soft/5 flex items-center justify-center mb-4 text-theme-accent">
-              <UserRound size={18} />
-            </div>
-            <div className="font-bold text-theme-text-main text-sm mb-1">Guest Exploration</div>
-            <div className="text-theme-text-muted text-[13px] leading-relaxed">Experience our adaptive simulations before creating an account.</div>
+          <div className="rounded-2xl border border-theme-border bg-white/80 p-4">
+            <div className="font-semibold text-theme-text-main">Guest mode available</div>
+            <div className="text-theme-text-muted mt-1">You can still try a scenario before creating an account.</div>
           </div>
         </div>
       </section>
 
-      <section className="flex flex-col justify-center">
-        <div className="bg-theme-surface-container-lowest rounded-[2.5rem] p-8 lg:p-12 float-shadow border border-theme-border/5">
-          <div className="max-w-md mx-auto w-full">
-            <div className="bg-theme-surface-container-low rounded-2xl p-1.5 flex items-center gap-1 mb-10">
-              <button
-                onClick={() => setMode('login')}
-                className={`flex-1 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
-                  mode === 'login' ? 'bg-theme-surface-container-lowest text-theme-text-main shadow-md' : 'text-theme-text-muted hover:text-theme-text-main'
-                }`}
-              >
-                Sign in
-              </button>
-              <button
-                onClick={() => setMode('signup')}
-                className={`flex-1 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
-                  mode === 'signup' ? 'bg-theme-surface-container-lowest text-theme-text-main shadow-md' : 'text-theme-text-muted hover:text-theme-text-main'
-                }`}
-              >
-                Join Now
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {mode === 'signup' && (
-                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                  <label className="label-sm mb-2.5 block ml-1">Full Name</label>
-                  <div className="flex items-center gap-3 rounded-[1.25rem] bg-theme-surface-container-low px-4 py-3.5 focus-within:ring-2 focus-within:ring-theme-accent/20 transition-all border border-transparent">
-                    <UserRound size={18} className="text-theme-text-muted" />
-                    <input
-                      value={displayName}
-                      onChange={(event) => setDisplayName(event.target.value)}
-                      placeholder="e.g. Spandan"
-                      className="w-full bg-transparent outline-none text-theme-text-main font-medium placeholder:text-theme-text-muted/60"
-                    />
-                  </div>
-                </div>
+      <section className="rounded-3xl bg-theme-surface border border-theme-border shadow-sm p-6 lg:p-8 flex flex-col justify-center">
+        <div className="max-w-md mx-auto w-full">
+          <div className="flex items-center gap-2 mb-6">
+            <Button
+              onClick={() => setMode('login')}
+              variant="ghost"
+              className={cn(
+                'flex-1 rounded-xl px-4 py-3 text-sm font-semibold h-auto',
+                mode === 'login' ? 'bg-theme-accent text-white hover:bg-theme-accent' : 'bg-theme-bg text-theme-text-muted'
               )}
+            >
+              Sign in
+            </Button>
+            <Button
+              onClick={() => setMode('signup')}
+              variant="ghost"
+              className={cn(
+                'flex-1 rounded-xl px-4 py-3 text-sm font-semibold h-auto',
+                mode === 'signup' ? 'bg-theme-accent text-white hover:bg-theme-accent' : 'bg-theme-bg text-theme-text-muted'
+              )}
+            >
+              Create account
+            </Button>
+          </div>
 
-              <div>
-                <label className="label-sm mb-2.5 block ml-1">Email Address</label>
-                <div className="flex items-center gap-3 rounded-[1.25rem] bg-theme-surface-container-low px-4 py-3.5 focus-within:ring-2 focus-within:ring-theme-accent/20 transition-all border border-transparent">
+          <div className="space-y-4">
+            {mode === 'signup' && (
+              <label className="block">
+                <span className="text-sm font-medium text-theme-text-main">Display name</span>
+                <div className="mt-2 flex items-center gap-2 rounded-xl border border-theme-border bg-theme-bg px-3 py-2">
                   <UserRound size={18} className="text-theme-text-muted" />
-                  <input
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="you@work.com"
-                    type="email"
-                    className="w-full bg-transparent outline-none text-theme-text-main font-medium placeholder:text-theme-text-muted/60"
+                  <Input
+                    value={displayName}
+                    onChange={(event) => setDisplayName(event.target.value)}
+                    placeholder="Spandan"
+                    className="h-auto border-0 bg-transparent px-0 py-0 focus-visible:ring-0"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="label-sm mb-2.5 block ml-1">Security Key</label>
-                <div className="flex items-center gap-3 rounded-[1.25rem] bg-theme-surface-container-low px-4 py-3.5 focus-within:ring-2 focus-within:ring-theme-accent/20 transition-all border border-transparent">
-                  <Lock size={18} className="text-theme-text-muted" />
-                  <input
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    placeholder="••••••••"
-                    type="password"
-                    className="w-full bg-transparent outline-none text-theme-text-main font-medium placeholder:text-theme-text-muted/60"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {error && (
-              <div className="mt-8 rounded-xl bg-red-50/50 px-4 py-3 text-sm text-red-600 border border-red-100/50 animate-in fade-in zoom-in-95">
-                {error}
-              </div>
+              </label>
             )}
 
-            <div className="mt-10 space-y-4">
-              <button
-                onClick={submit}
-                disabled={loading}
-                className="w-full rounded-[1.25rem] brand-gradient px-4 py-4 font-bold text-white shadow-[0_12px_30px_rgba(83,66,214,0.3)] transition-all hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {loading ? (
-                  <span className="inline-flex items-center gap-2">
-                    <Loader2 size={18} className="animate-spin" />
-                    Processing...
-                  </span>
-                ) : mode === 'signup' ? (
-                  'Create My Account'
-                ) : (
-                  'Authenticate Access'
-                )}
-              </button>
-              <button
-                onClick={onGuest}
-                className="w-full rounded-[1.25rem] bg-theme-surface-container-low px-4 py-4 font-bold text-theme-text-main transition-all hover:bg-theme-surface-container-high active:scale-95"
-              >
-                Continue as Guest
-              </button>
+            <label className="block">
+              <span className="text-sm font-medium text-theme-text-main">Email</span>
+              <div className="mt-2 flex items-center gap-2 rounded-xl border border-theme-border bg-theme-bg px-3 py-2">
+                <UserRound size={18} className="text-theme-text-muted" />
+                <Input
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="you@example.com"
+                  type="email"
+                  className="h-auto border-0 bg-transparent px-0 py-0 focus-visible:ring-0"
+                />
+              </div>
+            </label>
+
+            <label className="block">
+              <span className="text-sm font-medium text-theme-text-main">Password</span>
+              <div className="mt-2 flex items-center gap-2 rounded-xl border border-theme-border bg-theme-bg px-3 py-2">
+                <Lock size={18} className="text-theme-text-muted" />
+                <Input
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="At least 8 characters"
+                  type="password"
+                  className="h-auto border-0 bg-transparent px-0 py-0 focus-visible:ring-0"
+                />
+              </div>
+            </label>
+          </div>
+
+          {error && (
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
             </div>
+          )}
+
+          <div className="mt-6 space-y-3">
+            <Button
+              onClick={submit}
+              disabled={loading}
+              className="h-auto w-full rounded-xl px-4 py-3"
+            >
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  Working...
+                </span>
+              ) : mode === 'signup' ? (
+                'Create account'
+              ) : (
+                'Sign in'
+              )}
+            </Button>
+            <Button
+              onClick={onGuest}
+              variant="outline"
+              className="h-auto w-full rounded-xl border-theme-border bg-theme-bg px-4 py-3 hover:border-theme-accent hover:text-theme-accent"
+            >
+              Continue as guest
+            </Button>
           </div>
         </div>
       </section>
     </div>
-  );
   );
 }

@@ -1,102 +1,30 @@
 @import "tailwindcss";
 
 @theme {
-  --color-theme-bg: #f5f7f9;
-  --color-theme-surface: #eef1f3;
-  --color-theme-surface-low: #eef1f3;
-  --color-theme-surface-lowest: #ffffff;
-  --color-theme-surface-elevated: #ffffff;
-  --color-theme-surface-container: #eef1f3;
-  --color-theme-surface-container-low: #eef1f3;
-  --color-theme-surface-container-lowest: #ffffff;
-  --color-theme-surface-container-high: #e2e5e8;
-  --color-theme-surface-container-highest: #d8dce0;
-  --color-theme-primary: #5342d6;
-  --color-theme-secondary: #702ae1;
-  --color-theme-primary-container: #9c94ff;
-  --color-theme-secondary-container: #dcc9ff;
-  --color-theme-on-primary: #f5f0ff;
-  --color-theme-on-surface: #2c2f31;
-  --color-theme-accent: #5342d6;
-  --color-theme-accent-soft: #9c94ff;
-  --color-theme-text-main: #2c2f31;
-  --color-theme-text-muted: #666c72;
-  --color-theme-border: rgba(171, 173, 175, 0.15);
-  --color-theme-outline-variant: rgba(171, 173, 175, 0.15);
-  --color-theme-success: #2f9469;
-
-  --shadow-ambient: 0 24px 40px -12px rgba(83, 66, 214, 0.08);
-  --shadow-float: 0 32px 64px -16px rgba(44, 47, 49, 0.12);
+  --color-theme-bg: #F0F2F5;
+  --color-theme-surface: #FFFFFF;
+  --color-theme-primary: #1A365D;
+  --color-theme-accent: #2B6CB0;
+  --color-theme-text-main: #2D3748;
+  --color-theme-text-muted: #718096;
+  --color-theme-border: #E2E8F0;
+  --color-theme-success: #38A169;
 }
 
 body {
   background-color: var(--color-theme-bg);
   color: var(--color-theme-text-main);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
 }
 
-#root {
-  min-height: 100vh;
+.animate-delay-0 {
+  animation-delay: 0ms;
 }
 
-.font-display {
-  font-family: 'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+.animate-delay-150 {
+  animation-delay: 150ms;
 }
 
-.glass-surface {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.glass-primary {
-  background: color-mix(in oklab, var(--color-theme-primary-container) 80%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.brand-gradient {
-  background: linear-gradient(135deg, var(--color-theme-primary), var(--color-theme-secondary));
-}
-
-.ambient-shadow {
-  box-shadow: var(--shadow-ambient);
-}
-
-.float-shadow {
-  box-shadow: var(--shadow-float);
-}
-
-.no-border {
-  border: none !important;
-}
-
-.ghost-border {
-  border: 1px solid var(--color-theme-outline-variant);
-}
-
-/* Typography refinements */
-.display-lg {
-  @apply font-display text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05];
-}
-
-.display-md {
-  @apply font-display text-4xl md:text-5xl font-extrabold tracking-tight leading-[1.1];
-}
-
-.headline-lg {
-  @apply font-display text-2xl md:text-3xl font-bold tracking-tight;
-}
-
-.label-sm {
-  @apply font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-theme-text-muted;
-}
-
-@layer utilities {
-  .animate-in {
-    animation-duration: 500ms;
-    animation-fill-mode: both;
-  }
+.animate-delay-300 {
+  animation-delay: 300ms;
 }
