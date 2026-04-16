@@ -79,10 +79,10 @@ export default function AssessmentReport({
   );
 
   const getScoreColor = (score: number | 'NA') => {
-    if (score === 'NA') return 'bg-theme-bg text-theme-text-muted';
+    if (score === 'NA') return 'bg-theme-surface text-theme-text-muted';
     if (score >= 3) return 'bg-theme-success text-white';
-    if (score === 2) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-red-100 text-red-800';
+    if (score === 2) return 'bg-theme-surface text-theme-text-main';
+    return 'bg-theme-surface text-theme-text-main';
   };
 
   const getScoreBars = (score: number | 'NA') => {
@@ -105,36 +105,36 @@ export default function AssessmentReport({
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-8 text-center">
+      <div className="bg-theme-surface rounded-[1.5rem] shadow-[0_24px_60px_rgba(44,47,49,0.08)] p-8 text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-theme-accent/10 text-theme-accent mb-4">
           <CheckCircle2 size={32} />
         </div>
-        <h1 className="text-3xl font-bold text-theme-text-main mb-2">Assessment Complete</h1>
+        <h1 className="text-3xl font-display font-bold text-theme-text-main mb-2">Assessment Complete</h1>
         <p className="text-lg text-theme-text-muted mb-6">
           Skill Evaluated: <span className="font-semibold text-theme-text-main">{result.skill}</span>
         </p>
         <div className="grid sm:grid-cols-4 gap-3 mb-6 text-left">
-          <div className="bg-theme-bg rounded-md border border-theme-border p-3">
+          <div className="bg-theme-surface-elevated rounded-xl p-3">
             <div className="text-xs uppercase tracking-wide text-theme-text-muted">Overall Score</div>
             <div className="text-xl font-semibold text-theme-text-main mt-1">
               {result.overallScore === 'NA' ? 'Insufficient Evidence' : `Level ${result.overallScore}`}
             </div>
           </div>
-          <div className="bg-theme-bg rounded-md border border-theme-border p-3">
+          <div className="bg-theme-surface-elevated rounded-xl p-3">
             <div className="text-xs uppercase tracking-wide text-theme-text-muted">Confidence</div>
             <div className="text-xl font-semibold text-theme-text-main mt-1">{Math.round(result.overallConfidence * 100)}%</div>
           </div>
-          <div className="bg-theme-bg rounded-md border border-theme-border p-3">
+          <div className="bg-theme-surface-elevated rounded-xl p-3">
             <div className="text-xs uppercase tracking-wide text-theme-text-muted">Mode</div>
             <div className="text-xl font-semibold text-theme-text-main mt-1">{result.assessmentMode}</div>
           </div>
-          <div className="bg-theme-bg rounded-md border border-theme-border p-3">
+          <div className="bg-theme-surface-elevated rounded-xl p-3">
             <div className="text-xs uppercase tracking-wide text-theme-text-muted">Locale</div>
             <div className="text-xl font-semibold text-theme-text-main mt-1">{result.locale ?? 'en-IN'}</div>
           </div>
         </div>
 
-        <div className="bg-theme-bg rounded-md p-6 text-left border border-theme-border">
+        <div className="bg-theme-surface-elevated rounded-xl p-6 text-left">
           <h3 className="font-semibold text-theme-text-main mb-2 flex items-center gap-2">
             <AlertCircle size={18} className="text-theme-accent" />
             AI Evaluator Summary
@@ -148,7 +148,7 @@ export default function AssessmentReport({
       </div>
 
       <div className="space-y-4">
-        <h2 className="text-xl font-bold text-theme-text-main px-2">Detailed Breakdown</h2>
+        <h2 className="text-xl font-display font-bold text-theme-text-main px-2">Detailed Breakdown</h2>
 
         {result.dimensions.map((dimension, index) => {
           const isExpanded = expandedDim === dimension.dimension;
@@ -156,7 +156,7 @@ export default function AssessmentReport({
           return (
             <div
               key={index}
-              className="bg-theme-surface rounded-lg shadow-sm border border-theme-border overflow-hidden transition-all hover:border-theme-accent"
+              className="bg-theme-surface rounded-[1.25rem] shadow-[0_18px_40px_rgba(44,47,49,0.06)] overflow-hidden transition-all"
             >
               <button
                 onClick={() => setExpandedDim(isExpanded ? null : dimension.dimension)}
@@ -187,7 +187,7 @@ export default function AssessmentReport({
               </button>
 
               {isExpanded && (
-                <div className="px-6 pb-6 pt-2 border-t border-theme-border bg-theme-bg/50">
+                <div className="px-6 pb-6 pt-2 bg-theme-surface-elevated">
                   <div className="grid md:grid-cols-2 gap-6 mt-4">
                     <div>
                       <h4 className="text-xs font-bold text-theme-text-muted mb-2 uppercase tracking-wider">Feedback</h4>
@@ -195,7 +195,7 @@ export default function AssessmentReport({
                       <h4 className="text-xs font-bold text-theme-text-muted mt-4 mb-2 uppercase tracking-wider">Next Probe</h4>
                       <p className="text-theme-text-main text-sm leading-relaxed">{dimension.nextProbe}</p>
                     </div>
-                    <div className="bg-theme-surface p-4 rounded-md border border-theme-border shadow-sm relative">
+                    <div className="glass-surface p-4 rounded-xl shadow-[0_16px_36px_rgba(83,66,214,0.14)] relative">
                       <MessageSquareQuote size={24} className="text-theme-accent/20 absolute top-3 left-3" />
                       <h4 className="text-xs font-bold text-theme-text-muted mb-2 ml-8 uppercase tracking-wider">Evidence from Transcript</h4>
                       <p className="text-theme-text-main text-sm italic ml-8">"{dimension.excerpt || 'No direct quote captured.'}"</p>
@@ -209,31 +209,31 @@ export default function AssessmentReport({
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
+        <div className="bg-theme-surface rounded-[1.25rem] shadow-[0_18px_40px_rgba(44,47,49,0.06)] p-5">
           <h3 className="font-semibold text-theme-text-main mb-3">Reliability & Validity</h3>
           <ul className="space-y-2 text-sm text-theme-text-main">
             {reliabilityFlags.map((flag, index) => (
-              <li key={`rel-${index}`} className="bg-theme-bg border border-theme-border rounded p-2">
+              <li key={`rel-${index}`} className="bg-theme-surface-elevated rounded-lg p-2">
                 {flag}
               </li>
             ))}
             {validityNotes.map((note, index) => (
-              <li key={`val-${index}`} className="bg-theme-bg border border-theme-border rounded p-2">
+              <li key={`val-${index}`} className="bg-theme-surface-elevated rounded-lg p-2">
                 {note}
               </li>
             ))}
           </ul>
         </div>
-        <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
+        <div className="bg-theme-surface rounded-[1.25rem] shadow-[0_18px_40px_rgba(44,47,49,0.06)] p-5">
           <h3 className="font-semibold text-theme-text-main mb-3">Fairness & Calibration</h3>
           <ul className="space-y-2 text-sm text-theme-text-main">
             {fairnessChecks.map((check, index) => (
-              <li key={`fair-${index}`} className="bg-theme-bg border border-theme-border rounded p-2">
+              <li key={`fair-${index}`} className="bg-theme-surface-elevated rounded-lg p-2">
                 {check}
               </li>
             ))}
           </ul>
-          <div className="mt-3 bg-theme-bg border border-theme-border rounded p-3 text-xs text-theme-text-muted">
+          <div className="mt-3 bg-theme-surface-elevated rounded-lg p-3 text-xs text-theme-text-muted">
             Locale calibration:{' '}
             {localeCalibration
               ? `${localeCalibration.locale} | ratings ${localeCalibration.humanRatings} | artifacts ${localeCalibration.artifactCount} | raters ${localeCalibration.raterCount} | ${localeCalibration.calibrated ? 'calibrated' : 'not calibrated'}`
@@ -242,10 +242,10 @@ export default function AssessmentReport({
         </div>
       </div>
 
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
+      <div className="bg-theme-surface rounded-[1.25rem] shadow-[0_18px_40px_rgba(44,47,49,0.06)] p-5">
         <h3 className="font-semibold text-theme-text-main mb-3">Development Plan</h3>
         <div className="grid md:grid-cols-3 gap-3 text-sm">
-          <div className="bg-theme-bg border border-theme-border rounded p-3">
+          <div className="bg-theme-surface-elevated rounded-xl p-3">
             <div className="font-semibold text-theme-text-main mb-2">Immediate</div>
             {immediateActions.map((item, index) => (
               <p key={`immediate-${index}`} className="text-theme-text-main mb-1">
@@ -253,7 +253,7 @@ export default function AssessmentReport({
               </p>
             ))}
           </div>
-          <div className="bg-theme-bg border border-theme-border rounded p-3">
+          <div className="bg-theme-surface-elevated rounded-xl p-3">
             <div className="font-semibold text-theme-text-main mb-2">Next</div>
             {nextActions.map((item, index) => (
               <p key={`next-${index}`} className="text-theme-text-main mb-1">
@@ -261,7 +261,7 @@ export default function AssessmentReport({
               </p>
             ))}
           </div>
-          <div className="bg-theme-bg border border-theme-border rounded p-3">
+          <div className="bg-theme-surface-elevated rounded-xl p-3">
             <div className="font-semibold text-theme-text-main mb-2">Stretch</div>
             {stretchActions.map((item, index) => (
               <p key={`stretch-${index}`} className="text-theme-text-main mb-1">
@@ -272,12 +272,12 @@ export default function AssessmentReport({
         </div>
       </div>
 
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
+      <div className="bg-theme-surface rounded-[1.25rem] shadow-[0_18px_40px_rgba(44,47,49,0.06)] p-5">
         <h3 className="font-semibold text-theme-text-main mb-3">Dimension Trend Lines</h3>
         <div className="grid md:grid-cols-2 gap-4">
           {dimensionTrends.length === 0 && <p className="text-sm text-theme-text-muted">No trend data yet.</p>}
           {dimensionTrends.map((series) => (
-            <div key={series.dimension} className="bg-theme-bg border border-theme-border rounded p-3">
+            <div key={series.dimension} className="bg-theme-surface-elevated rounded-xl p-3">
               <div className="text-sm font-semibold text-theme-text-main mb-2">{series.dimension}</div>
               <TrendLine points={series.points} />
               <div className="text-xs text-theme-text-muted mt-2">{series.points.length} observations</div>
@@ -286,7 +286,7 @@ export default function AssessmentReport({
         </div>
       </div>
 
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
+      <div className="bg-theme-surface rounded-[1.25rem] shadow-[0_18px_40px_rgba(44,47,49,0.06)] p-5">
         <div className="flex items-center justify-between gap-3 mb-3">
           <h3 className="font-semibold text-theme-text-main">Session History</h3>
           <span className="text-xs uppercase tracking-widest text-theme-text-muted">
@@ -298,16 +298,16 @@ export default function AssessmentReport({
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
             {sessionHistory.slice(0, 6).map((session) => (
-              <div key={session.id} className="rounded-xl border border-theme-border bg-theme-bg p-3 text-sm">
+              <div key={session.id} className="rounded-xl bg-theme-surface-elevated p-3 text-sm">
                 <div className="font-semibold text-theme-text-main">{session.taskTitle}</div>
                 <div className="text-xs text-theme-text-muted mt-1">
                   {session.createdAt.slice(0, 10)} | {session.assessmentMode} | {session.locale}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <span className="rounded-full bg-white px-2 py-1 text-xs text-theme-text-main border border-theme-border">
+                  <span className="rounded-full bg-theme-surface px-2 py-1 text-xs text-theme-text-main">
                     {session.overallScore === 'NA' ? 'No evidence' : `Score ${session.overallScore}`}
                   </span>
-                  <span className="rounded-full bg-white px-2 py-1 text-xs text-theme-text-main border border-theme-border">
+                  <span className="rounded-full bg-theme-surface px-2 py-1 text-xs text-theme-text-main">
                     {Math.round(session.overallConfidence * 100)}% confidence
                   </span>
                 </div>
@@ -317,12 +317,12 @@ export default function AssessmentReport({
         )}
       </div>
 
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
+      <div className="bg-theme-surface rounded-[1.25rem] shadow-[0_18px_40px_rgba(44,47,49,0.06)] p-5">
         <h3 className="font-semibold text-theme-text-main mb-3">Recommended Next Scenarios</h3>
         <div className="space-y-2 text-sm">
           {recommendations.length === 0 && <p className="text-theme-text-muted">No recommendations available yet.</p>}
           {recommendations.map((recommendation, index) => (
-            <div key={`${recommendation.dimension}-${index}`} className="bg-theme-bg border border-theme-border rounded p-3">
+            <div key={`${recommendation.dimension}-${index}`} className="bg-theme-surface-elevated rounded-xl p-3">
               <p className="font-semibold text-theme-text-main">{recommendation.dimension}</p>
               <p className="text-theme-text-muted">{recommendation.reason}</p>
               <p className="text-theme-text-main mt-1">Try: {recommendation.recommendedScenarioTitle}</p>
@@ -331,7 +331,7 @@ export default function AssessmentReport({
         </div>
       </div>
 
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
+      <div className="bg-theme-surface rounded-[1.25rem] shadow-[0_18px_40px_rgba(44,47,49,0.06)] p-5">
         <button
           onClick={() => setShowTurnEvidence((previous) => !previous)}
           className="w-full text-left font-semibold text-theme-text-main"
@@ -341,7 +341,7 @@ export default function AssessmentReport({
         {showTurnEvidence && (
           <div className="mt-4 space-y-2 max-h-[320px] overflow-y-auto">
             {(result.turnEvidence || []).map((turn) => (
-              <div key={`${turn.turnId}-${turn.turnIndex}`} className="bg-theme-bg border border-theme-border rounded p-3 text-sm">
+              <div key={`${turn.turnId}-${turn.turnIndex}`} className="bg-theme-surface-elevated rounded-lg p-3 text-sm">
                 <p className="font-semibold text-theme-text-main">
                   Turn {turn.turnIndex} | Confidence {Math.round(turn.overallTurnConfidence * 100)}%
                 </p>
@@ -357,12 +357,12 @@ export default function AssessmentReport({
         )}
       </div>
 
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
+      <div className="bg-theme-surface rounded-[1.25rem] shadow-[0_18px_40px_rgba(44,47,49,0.06)] p-5">
         <h3 className="font-semibold text-theme-text-main mb-3">Recent Skill Sessions</h3>
         <div className="space-y-2 text-sm">
           {sortedHistory.length === 0 && <p className="text-theme-text-muted">No history yet for this skill.</p>}
           {sortedHistory.map((entry) => (
-            <div key={entry.id} className="flex items-center justify-between bg-theme-bg border border-theme-border rounded p-2">
+            <div key={entry.id} className="flex items-center justify-between bg-theme-surface-elevated rounded-lg p-2">
               <div className="text-theme-text-main">
                 {new Date(entry.createdAt).toLocaleString()} ({entry.assessmentMode}, {entry.locale})
               </div>
@@ -377,7 +377,7 @@ export default function AssessmentReport({
       <div className="flex justify-center pt-8 pb-12">
         <button
           onClick={onReset}
-          className="px-6 py-2.5 bg-transparent border border-theme-border text-theme-text-main font-semibold rounded-md hover:bg-theme-bg transition-colors shadow-sm"
+          className="px-6 py-2.5 bg-theme-surface-elevated text-theme-text-main font-semibold rounded-lg hover:bg-theme-surface transition-colors shadow-[0_12px_24px_rgba(44,47,49,0.08)]"
         >
           Try Another Scenario
         </button>

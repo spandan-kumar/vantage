@@ -94,27 +94,27 @@ export default function ChatInterface({
   const canEvaluate = assessmentMode === 'practice' || minimumEvidenceMet;
 
   return (
-    <div className="flex flex-col h-[600px] bg-theme-surface rounded-lg shadow-sm border border-theme-border overflow-hidden">
-      <div className="p-4 border-b border-theme-border bg-theme-bg flex justify-between items-center">
+    <div className="flex flex-col h-[600px] bg-theme-surface rounded-[1.4rem] shadow-[0_24px_60px_rgba(44,47,49,0.09)] overflow-hidden">
+      <div className="p-4 bg-theme-surface-elevated flex justify-between items-center">
         <div>
-          <h2 className="font-semibold text-theme-text-main">{task.title}</h2>
+          <h2 className="font-display font-semibold text-theme-text-main">{task.title}</h2>
           <p className="text-sm text-theme-text-muted">Teammates: {task.teammates.join(', ')}</p>
         </div>
         <button
           onClick={() => onComplete(messages)}
           disabled={!canEvaluate}
-          className="px-6 py-2.5 bg-theme-accent text-white text-sm font-semibold rounded-md hover:opacity-90 transition-colors border-none disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2.5 brand-gradient text-white text-sm font-semibold rounded-lg hover:opacity-90 transition-colors border-none disabled:opacity-50 disabled:cursor-not-allowed"
         >
           End & Evaluate
         </button>
       </div>
       {!canEvaluate && (
-        <div className="px-4 py-2 text-xs text-theme-text-muted border-b border-theme-border bg-theme-bg">
+        <div className="px-4 py-2 text-xs text-theme-text-muted bg-theme-surface-elevated">
           Add at least {4 - userTurnCount} more user turn(s) to unlock a stable assessment.
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 md:p-5 space-y-4 bg-theme-surface">
         {messages.length === 0 && !isLoading && (
           <div className="text-center text-theme-text-muted mt-10">Starting conversation...</div>
         )}
@@ -138,10 +138,10 @@ export default function ChatInterface({
             )}>
               <span className="text-xs text-theme-text-muted mb-1 px-1">{msg.sender}</span>
               <div className={cn(
-                "px-4 py-3 rounded-lg border",
+                "px-4 py-3 rounded-2xl",
                 msg.isUser 
-                  ? "bg-theme-accent text-white border-theme-accent" 
-                  : "bg-theme-surface text-theme-text-main border-theme-border"
+                  ? "brand-gradient text-white" 
+                  : "glass-surface text-theme-text-main"
               )}>
                 {msg.text}
               </div>
@@ -160,7 +160,7 @@ export default function ChatInterface({
             </div>
             <div className="flex flex-col items-start">
               <span className="text-xs text-theme-text-muted mb-1 px-1">Teammates typing...</span>
-              <div className="px-4 py-3 rounded-lg border bg-theme-surface text-theme-text-main border-theme-border flex items-center gap-1 h-[46px]">
+              <div className="px-4 py-3 rounded-2xl glass-surface text-theme-text-main flex items-center gap-1 h-[46px]">
                 <div className="w-2 h-2 bg-theme-text-muted rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                 <div className="w-2 h-2 bg-theme-text-muted rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                 <div className="w-2 h-2 bg-theme-text-muted rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
@@ -171,7 +171,7 @@ export default function ChatInterface({
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 border-t border-theme-border bg-theme-surface">
+      <div className="p-4 bg-theme-surface-elevated">
         <div className="flex gap-2">
           <input
             type="text"
@@ -179,13 +179,13 @@ export default function ChatInterface({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Type your message..."
-            className="flex-1 px-4 py-2 border border-theme-border rounded-md focus:outline-none focus:border-theme-accent bg-theme-surface text-theme-text-main"
+            className="flex-1 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-accent/30 bg-theme-surface text-theme-text-main"
             disabled={isLoading}
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="px-4 py-2 bg-theme-accent text-white rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border-none"
+            className="px-4 py-2 brand-gradient text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border-none"
           >
             <Send size={20} />
           </button>
