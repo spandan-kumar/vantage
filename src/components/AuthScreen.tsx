@@ -44,6 +44,9 @@ export default function AuthScreen({ onSignIn, onSignUp, onGuest }: AuthScreenPr
             <Sparkles size={14} className="text-theme-accent" />
             Durable skills assessment
           </div>
+          <p className="text-sm text-theme-text-muted leading-relaxed max-w-xl">
+            Most assessments measure what is easy to score. Durable skills are harder—they show up in conversation and judgment calls, not tidy tests. This app puts you in simulated tasks with AI teammates and scores you on rubrics so capability is easier to see and improve.
+          </p>
           <div className="space-y-4">
             <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-theme-primary">
               Sign in to keep your sessions, scores, and progression in one place.
