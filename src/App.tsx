@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TASKS } from './data/tasks';
 import {
   Task,
@@ -16,6 +16,10 @@ import {
 import AuthScreen from './components/AuthScreen';
 import ChatInterface from './components/ChatInterface';
 import AssessmentReport from './components/AssessmentReport';
+import { Badge } from './components/ui/badge';
+import { Button } from './components/ui/button';
+import { Card, CardContent, CardDescription, CardTitle } from './components/ui/card';
+import { Select } from './components/ui/select';
 import {
   evaluateTranscript,
   fetchLocaleCalibration,
@@ -24,6 +28,7 @@ import {
 } from './services/gemini';
 import { fetchCurrentUser, signIn, signOut, signUp } from './services/auth';
 import { BrainCircuit, Users, Lightbulb, FileText, Loader2 } from 'lucide-react';
+import { cn } from './lib/utils';
 
 type AppState = 'SELECTION' | 'CHAT' | 'EVALUATING' | 'REPORT';
 
@@ -72,6 +77,9 @@ function App() {
   const [history, setHistory] = useState<HistorySession[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [calibration, setCalibration] = useState<LocaleCalibrationResponse | null>(null);
+  const appStateRef = useRef<AppState>('SELECTION');
+  const sessionIdRef = useRef<string>(sessionId);
+  const chatHistorySessionRef = useRef<string | null>(null);
 
   const effectiveUserId = authUser?.id || guestUserId;
   const isAuthenticated = Boolean(authUser);
@@ -149,12 +157,18 @@ function App() {
     }
   };
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setAppState('SELECTION');
     setSelectedTask(null);
     setAssessmentResult(null);
     setSessionId(makeId());
-  };
+  }, []);
+
+  const confirmCancelActiveChat = useCallback(() => {
+    if (typeof window === 'undefined') return true;
+    if (appStateRef.current !== 'CHAT') return true;
+    return window.confirm('You have an active session. Cancel this chat and return to home?');
+  }, []);
 
   const handleSignIn = async (email: string, password: string) => {
     const response = await signIn(email, password);
@@ -189,6 +203,23 @@ function App() {
     setAppState('SELECTION');
   };
 
+  const handleShowSignIn = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    if (appStateRef.current !== 'SELECTION') {
+      const ok = window.confirm(
+        'You will leave the current screen and go to sign in. Unsaved progress in this flow may be lost. Continue?'
+      );
+      if (!ok) return;
+    }
+    setAuthUser(null);
+    setAuthMode('signed-out');
+    window.localStorage.removeItem(AUTH_MODE_STORAGE_KEY);
+    setAppState('SELECTION');
+    setSelectedTask(null);
+    setAssessmentResult(null);
+    setSessionId(makeId());
+  }, []);
+
   const handleLogout = async () => {
     try {
       await signOut();
@@ -210,6 +241,51 @@ function App() {
     if (!assessmentResult) return [];
     return history.filter((entry) => entry.skill === assessmentResult.skill).slice(0, 15);
   }, [assessmentResult, history]);
+
+  useEffect(() => {
+    appStateRef.current = appState;
+  }, [appState]);
+
+  useEffect(() => {
+    sessionIdRef.current = sessionId;
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (appStateRef.current !== 'CHAT') return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (appState !== 'CHAT' || !selectedTask) {
+      chatHistorySessionRef.current = null;
+      return;
+    }
+    if (chatHistorySessionRef.current === sessionId) return;
+    window.history.pushState({ screen: 'chat', sessionId }, '', window.location.href);
+    chatHistorySessionRef.current = sessionId;
+  }, [appState, selectedTask, sessionId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onPopState = () => {
+      if (appStateRef.current !== 'CHAT') return;
+      const shouldCancel = confirmCancelActiveChat();
+      if (shouldCancel) {
+        handleReset();
+        return;
+      }
+      window.history.pushState({ screen: 'chat', sessionId: sessionIdRef.current }, '', window.location.href);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [confirmCancelActiveChat, handleReset]);
 
   const dimensionTrends = useMemo(() => {
     if (!assessmentResult) return [];
@@ -269,13 +345,26 @@ function App() {
           </div>
           {authReady && (
             <div className="flex items-center gap-3 text-sm">
-              <span className="rounded-full bg-white/10 px-3 py-1">
+              <Badge variant="outline" className="border-white/20 bg-white/10 text-white">
                 {isAuthenticated ? authUser?.displayName || authUser?.email : authMode === 'guest' ? 'Guest mode' : 'Not signed in'}
-              </span>
+              </Badge>
+              {!isAuthenticated && authMode === 'guest' && (
+                <Button
+                  onClick={handleShowSignIn}
+                  variant="ghost"
+                  className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-white hover:bg-white/20"
+                >
+                  Sign in
+                </Button>
+              )}
               {isAuthenticated && (
-                <button onClick={handleLogout} className="rounded-full bg-white/10 px-3 py-1 font-medium hover:bg-white/20">
+                <Button
+                  onClick={handleLogout}
+                  variant="ghost"
+                  className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-white hover:bg-white/20"
+                >
                   Sign out
-                </button>
+                </Button>
               )}
             </div>
           )}
@@ -302,56 +391,73 @@ function App() {
                   ? `Signed in as ${authUser?.displayName || authUser?.email}. Your session history is stored on the server.`
                   : 'You are in guest mode. Sign in to keep your session history across devices.'}
               </p>
+              {!isAuthenticated && authMode === 'guest' && (
+                <div>
+                  <Button variant="outline" className="mt-1" onClick={handleShowSignIn}>
+                    Sign in or create an account
+                  </Button>
+                </div>
+              )}
               <div className="grid sm:grid-cols-3 gap-3 text-left">
-                <div className="bg-theme-surface border border-theme-border rounded-md p-3">
-                  <label className="text-xs uppercase tracking-wide text-theme-text-muted">Mode</label>
-                  <div className="inline-flex bg-theme-bg border border-theme-border rounded-md p-1 mt-2 w-full">
-                    <button
+                <Card className="rounded-md shadow-none">
+                  <CardContent className="p-3">
+                    <label className="text-xs uppercase tracking-wide text-theme-text-muted">Mode</label>
+                    <div className="inline-flex bg-theme-bg border border-theme-border rounded-md p-1 mt-2 w-full">
+                      <Button
                       onClick={() => setAssessmentMode('assessment')}
-                      className={`px-2 py-1.5 text-sm rounded flex-1 ${assessmentMode === 'assessment' ? 'bg-theme-accent text-white' : 'text-theme-text-muted'}`}
+                      variant="ghost"
+                      className={cn(
+                        'h-auto px-2 py-1.5 text-sm rounded flex-1 hover:bg-transparent',
+                        assessmentMode === 'assessment' ? 'bg-theme-accent text-white hover:bg-theme-accent' : 'text-theme-text-muted'
+                      )}
                     >
                       Assessment
-                    </button>
-                    <button
+                      </Button>
+                      <Button
                       onClick={() => setAssessmentMode('practice')}
-                      className={`px-2 py-1.5 text-sm rounded flex-1 ${assessmentMode === 'practice' ? 'bg-theme-accent text-white' : 'text-theme-text-muted'}`}
+                      variant="ghost"
+                      className={cn(
+                        'h-auto px-2 py-1.5 text-sm rounded flex-1 hover:bg-transparent',
+                        assessmentMode === 'practice' ? 'bg-theme-accent text-white hover:bg-theme-accent' : 'text-theme-text-muted'
+                      )}
                     >
                       Practice
-                    </button>
-                  </div>
-                </div>
-                <div className="bg-theme-surface border border-theme-border rounded-md p-3">
-                  <label className="text-xs uppercase tracking-wide text-theme-text-muted">Locale</label>
-                  <select
-                    value={locale}
-                    onChange={(event) => setLocale(event.target.value as LocaleCode)}
-                    className="mt-2 w-full border border-theme-border rounded-md px-2 py-2 bg-theme-bg"
-                  >
-                    <option value="en-IN">English (India)</option>
-                    <option value="en-US">English (US)</option>
-                    <option value="hi-IN">Hindi (India)</option>
-                  </select>
-                </div>
-                <div className="bg-theme-surface border border-theme-border rounded-md p-3">
-                  <label className="text-xs uppercase tracking-wide text-theme-text-muted">Scoring Profile</label>
-                  <select
-                    value={scoringProfileId}
-                    onChange={(event) => setScoringProfileId(event.target.value as ScoringProfileId)}
-                    className="mt-2 w-full border border-theme-border rounded-md px-2 py-2 bg-theme-bg"
-                  >
-                    <option value="default">Balanced</option>
-                    <option value="strict">Strict</option>
-                    <option value="formative">Formative</option>
-                  </select>
-                </div>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="rounded-md shadow-none">
+                  <CardContent className="p-3">
+                    <label className="text-xs uppercase tracking-wide text-theme-text-muted">Locale</label>
+                    <Select value={locale} onChange={(event) => setLocale(event.target.value as LocaleCode)} className="mt-2">
+                      <option value="en-IN">English (India)</option>
+                      <option value="en-US">English (US)</option>
+                      <option value="hi-IN">Hindi (India)</option>
+                    </Select>
+                  </CardContent>
+                </Card>
+                <Card className="rounded-md shadow-none">
+                  <CardContent className="p-3">
+                    <label className="text-xs uppercase tracking-wide text-theme-text-muted">Scoring Profile</label>
+                    <Select
+                      value={scoringProfileId}
+                      onChange={(event) => setScoringProfileId(event.target.value as ScoringProfileId)}
+                      className="mt-2"
+                    >
+                      <option value="default">Balanced</option>
+                      <option value="strict">Strict</option>
+                      <option value="formative">Formative</option>
+                    </Select>
+                  </CardContent>
+                </Card>
               </div>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6 mt-12">
               {localizedTasks.map((task) => (
-                <div
+                <Card
                   key={task.id}
-                  className="bg-theme-surface rounded-lg p-5 shadow-sm border border-theme-border hover:border-theme-accent transition-all flex flex-col h-full cursor-pointer group"
+                  className="p-5 hover:border-theme-accent transition-all flex flex-col h-full cursor-pointer group"
                   onClick={() => handleStartTask(task)}
                 >
                   <div className="flex items-center gap-3 mb-4">
@@ -367,18 +473,21 @@ function App() {
                   <h4 className="text-lg font-semibold mb-2 text-theme-text-main">{task.title}</h4>
                   <p className="text-sm text-theme-text-muted flex-1 line-clamp-3 mb-6">{task.description}</p>
 
-                  <button className="w-full py-2.5 bg-transparent border border-theme-border text-theme-text-main font-semibold rounded-md group-hover:bg-theme-accent group-hover:text-white group-hover:border-theme-accent transition-colors">
+                  <Button
+                    variant="outline"
+                    className="w-full group-hover:bg-theme-accent group-hover:text-white group-hover:border-theme-accent"
+                  >
                     Start Scenario
-                  </button>
-                </div>
+                  </Button>
+                </Card>
               ))}
             </div>
 
-            <div className="bg-theme-surface border border-theme-border rounded-xl p-5 shadow-sm">
+            <Card className="rounded-xl p-5">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-theme-text-main">Recent Sessions</h3>
-                  <p className="text-sm text-theme-text-muted">Your latest assessment runs and confidence levels.</p>
+                  <CardTitle>Recent Sessions</CardTitle>
+                  <CardDescription>Your latest assessment runs and confidence levels.</CardDescription>
                 </div>
                 <span className="text-xs uppercase tracking-widest text-theme-text-muted">
                   {currentSessions.length} total
@@ -389,24 +498,24 @@ function App() {
               ) : (
                 <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
                   {currentSessions.slice(0, 6).map((session) => (
-                    <div key={session.id} className="rounded-xl border border-theme-border bg-theme-bg p-4 text-sm">
+                    <Card key={session.id} className="rounded-xl bg-theme-bg p-4 text-sm shadow-none">
                       <div className="font-semibold text-theme-text-main">{session.taskTitle}</div>
                       <div className="text-xs text-theme-text-muted mt-1">
                         {session.createdAt.slice(0, 10)} | {session.assessmentMode} | {session.skill}
                       </div>
                       <div className="mt-2 flex flex-wrap gap-2">
-                        <span className="rounded-full bg-white px-2 py-1 text-xs text-theme-text-main border border-theme-border">
+                        <Badge variant="secondary" className="bg-white">
                           {session.overallScore === 'NA' ? 'No evidence' : `Score ${session.overallScore}`}
-                        </span>
-                        <span className="rounded-full bg-white px-2 py-1 text-xs text-theme-text-main border border-theme-border">
+                        </Badge>
+                        <Badge variant="secondary" className="bg-white">
                           {Math.round(session.overallConfidence * 100)}% confidence
-                        </span>
+                        </Badge>
                       </div>
-                    </div>
+                    </Card>
                   ))}
                 </div>
               )}
-            </div>
+            </Card>
           </div>
         )}
 
@@ -420,9 +529,17 @@ function App() {
                   <span className="font-semibold text-theme-text-main">{locale}</span>
                 </p>
               </div>
-              <button onClick={handleReset} className="text-sm font-medium text-theme-text-muted hover:text-theme-text-main">
+              <Button
+                onClick={() => {
+                  if (confirmCancelActiveChat()) {
+                    handleReset();
+                  }
+                }}
+                variant="ghost"
+                className="text-sm font-medium"
+              >
                 Cancel
-              </button>
+              </Button>
             </div>
             <ChatInterface
               task={selectedTask}

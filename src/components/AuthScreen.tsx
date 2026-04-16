@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Loader2, Lock, UserRound, Sparkles } from 'lucide-react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { cn } from '../lib/utils';
 
 type AuthMode = 'login' | 'signup';
 
@@ -71,22 +74,26 @@ export default function AuthScreen({ onSignIn, onSignUp, onGuest }: AuthScreenPr
       <section className="rounded-3xl bg-theme-surface border border-theme-border shadow-sm p-6 lg:p-8 flex flex-col justify-center">
         <div className="max-w-md mx-auto w-full">
           <div className="flex items-center gap-2 mb-6">
-            <button
+            <Button
               onClick={() => setMode('login')}
-              className={`flex-1 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                mode === 'login' ? 'bg-theme-accent text-white' : 'bg-theme-bg text-theme-text-muted'
-              }`}
+              variant="ghost"
+              className={cn(
+                'flex-1 rounded-xl px-4 py-3 text-sm font-semibold h-auto',
+                mode === 'login' ? 'bg-theme-accent text-white hover:bg-theme-accent' : 'bg-theme-bg text-theme-text-muted'
+              )}
             >
               Sign in
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setMode('signup')}
-              className={`flex-1 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                mode === 'signup' ? 'bg-theme-accent text-white' : 'bg-theme-bg text-theme-text-muted'
-              }`}
+              variant="ghost"
+              className={cn(
+                'flex-1 rounded-xl px-4 py-3 text-sm font-semibold h-auto',
+                mode === 'signup' ? 'bg-theme-accent text-white hover:bg-theme-accent' : 'bg-theme-bg text-theme-text-muted'
+              )}
             >
               Create account
-            </button>
+            </Button>
           </div>
 
           <div className="space-y-4">
@@ -95,11 +102,11 @@ export default function AuthScreen({ onSignIn, onSignUp, onGuest }: AuthScreenPr
                 <span className="text-sm font-medium text-theme-text-main">Display name</span>
                 <div className="mt-2 flex items-center gap-2 rounded-xl border border-theme-border bg-theme-bg px-3 py-2">
                   <UserRound size={18} className="text-theme-text-muted" />
-                  <input
+                  <Input
                     value={displayName}
                     onChange={(event) => setDisplayName(event.target.value)}
                     placeholder="Spandan"
-                    className="w-full bg-transparent outline-none text-theme-text-main placeholder:text-theme-text-muted"
+                    className="h-auto border-0 bg-transparent px-0 py-0 focus-visible:ring-0"
                   />
                 </div>
               </label>
@@ -109,12 +116,12 @@ export default function AuthScreen({ onSignIn, onSignUp, onGuest }: AuthScreenPr
               <span className="text-sm font-medium text-theme-text-main">Email</span>
               <div className="mt-2 flex items-center gap-2 rounded-xl border border-theme-border bg-theme-bg px-3 py-2">
                 <UserRound size={18} className="text-theme-text-muted" />
-                <input
+                <Input
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="you@example.com"
                   type="email"
-                  className="w-full bg-transparent outline-none text-theme-text-main placeholder:text-theme-text-muted"
+                  className="h-auto border-0 bg-transparent px-0 py-0 focus-visible:ring-0"
                 />
               </div>
             </label>
@@ -123,12 +130,12 @@ export default function AuthScreen({ onSignIn, onSignUp, onGuest }: AuthScreenPr
               <span className="text-sm font-medium text-theme-text-main">Password</span>
               <div className="mt-2 flex items-center gap-2 rounded-xl border border-theme-border bg-theme-bg px-3 py-2">
                 <Lock size={18} className="text-theme-text-muted" />
-                <input
+                <Input
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="At least 8 characters"
                   type="password"
-                  className="w-full bg-transparent outline-none text-theme-text-main placeholder:text-theme-text-muted"
+                  className="h-auto border-0 bg-transparent px-0 py-0 focus-visible:ring-0"
                 />
               </div>
             </label>
@@ -141,10 +148,10 @@ export default function AuthScreen({ onSignIn, onSignUp, onGuest }: AuthScreenPr
           )}
 
           <div className="mt-6 space-y-3">
-            <button
+            <Button
               onClick={submit}
               disabled={loading}
-              className="w-full rounded-xl bg-theme-accent px-4 py-3 font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-auto w-full rounded-xl px-4 py-3"
             >
               {loading ? (
                 <span className="inline-flex items-center gap-2">
@@ -156,13 +163,14 @@ export default function AuthScreen({ onSignIn, onSignUp, onGuest }: AuthScreenPr
               ) : (
                 'Sign in'
               )}
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={onGuest}
-              className="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 font-semibold text-theme-text-main transition-colors hover:border-theme-accent hover:text-theme-accent"
+              variant="outline"
+              className="h-auto w-full rounded-xl border-theme-border bg-theme-bg px-4 py-3 hover:border-theme-accent hover:text-theme-accent"
             >
               Continue as guest
-            </button>
+            </Button>
           </div>
         </div>
       </section>

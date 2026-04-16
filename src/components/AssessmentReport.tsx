@@ -7,6 +7,9 @@ import {
 } from '../types';
 import { ChevronDown, ChevronUp, CheckCircle2, AlertCircle, MessageSquareQuote } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 interface TrendSeries {
   dimension: string;
@@ -105,15 +108,16 @@ export default function AssessmentReport({
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-8 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-theme-accent/10 text-theme-accent mb-4">
-          <CheckCircle2 size={32} />
-        </div>
-        <h1 className="text-3xl font-bold text-theme-text-main mb-2">Assessment Complete</h1>
-        <p className="text-lg text-theme-text-muted mb-6">
-          Skill Evaluated: <span className="font-semibold text-theme-text-main">{result.skill}</span>
-        </p>
-        <div className="grid sm:grid-cols-4 gap-3 mb-6 text-left">
+      <Card>
+        <CardContent className="p-8 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-theme-accent/10 text-theme-accent mb-4">
+            <CheckCircle2 size={32} />
+          </div>
+          <h1 className="text-3xl font-bold text-theme-text-main mb-2">Assessment Complete</h1>
+          <p className="text-lg text-theme-text-muted mb-6">
+            Skill Evaluated: <span className="font-semibold text-theme-text-main">{result.skill}</span>
+          </p>
+          <div className="grid sm:grid-cols-4 gap-3 mb-6 text-left">
           <div className="bg-theme-bg rounded-md border border-theme-border p-3">
             <div className="text-xs uppercase tracking-wide text-theme-text-muted">Overall Score</div>
             <div className="text-xl font-semibold text-theme-text-main mt-1">
@@ -132,20 +136,21 @@ export default function AssessmentReport({
             <div className="text-xs uppercase tracking-wide text-theme-text-muted">Locale</div>
             <div className="text-xl font-semibold text-theme-text-main mt-1">{result.locale ?? 'en-IN'}</div>
           </div>
-        </div>
+          </div>
 
-        <div className="bg-theme-bg rounded-md p-6 text-left border border-theme-border">
-          <h3 className="font-semibold text-theme-text-main mb-2 flex items-center gap-2">
-            <AlertCircle size={18} className="text-theme-accent" />
-            AI Evaluator Summary
-          </h3>
-          <p className="text-theme-text-main leading-relaxed">{result.summary}</p>
-          <p className="mt-3 text-xs text-theme-text-muted">
-            Artifact: {result.metadata?.artifactId ?? 'n/a'} | Scorer: {result.metadata?.scorerVersion ?? 'n/a'} | Policy:{' '}
-            {result.metadata?.policyVersion ?? 'n/a'}
-          </p>
-        </div>
-      </div>
+          <div className="bg-theme-bg rounded-md p-6 text-left border border-theme-border">
+            <h3 className="font-semibold text-theme-text-main mb-2 flex items-center gap-2">
+              <AlertCircle size={18} className="text-theme-accent" />
+              AI Evaluator Summary
+            </h3>
+            <p className="text-theme-text-main leading-relaxed">{result.summary}</p>
+            <p className="mt-3 text-xs text-theme-text-muted">
+              Artifact: {result.metadata?.artifactId ?? 'n/a'} | Scorer: {result.metadata?.scorerVersion ?? 'n/a'} | Policy:{' '}
+              {result.metadata?.policyVersion ?? 'n/a'}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="space-y-4">
         <h2 className="text-xl font-bold text-theme-text-main px-2">Detailed Breakdown</h2>
@@ -154,9 +159,9 @@ export default function AssessmentReport({
           const isExpanded = expandedDim === dimension.dimension;
 
           return (
-            <div
+            <Card
               key={index}
-              className="bg-theme-surface rounded-lg shadow-sm border border-theme-border overflow-hidden transition-all hover:border-theme-accent"
+              className="overflow-hidden transition-all hover:border-theme-accent"
             >
               <button
                 onClick={() => setExpandedDim(isExpanded ? null : dimension.dimension)}
@@ -165,14 +170,14 @@ export default function AssessmentReport({
                 <div className="flex items-center gap-6">
                   <div className="w-24 flex flex-col items-center gap-1">
                     {getScoreBars(dimension.score)}
-                    <span
+                    <Badge
                       className={cn(
-                        'text-xs font-bold px-2 py-1 rounded mt-1 uppercase tracking-wider',
+                        'text-xs font-bold mt-1 uppercase tracking-wider',
                         getScoreColor(dimension.score)
                       )}
                     >
                       {dimension.score === 'NA' ? 'No Evidence' : `Level ${dimension.score}`}
-                    </span>
+                    </Badge>
                   </div>
                   <div className="text-left">
                     <h3 className="font-semibold text-theme-text-main text-lg">{dimension.dimension}</h3>
@@ -203,14 +208,17 @@ export default function AssessmentReport({
                   </div>
                 </div>
               )}
-            </div>
+            </Card>
           );
         })}
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
-          <h3 className="font-semibold text-theme-text-main mb-3">Reliability & Validity</h3>
+        <Card>
+          <CardHeader className="p-5 pb-3">
+            <CardTitle className="text-base">Reliability & Validity</CardTitle>
+          </CardHeader>
+          <CardContent className="p-5 pt-0">
           <ul className="space-y-2 text-sm text-theme-text-main">
             {reliabilityFlags.map((flag, index) => (
               <li key={`rel-${index}`} className="bg-theme-bg border border-theme-border rounded p-2">
@@ -223,9 +231,13 @@ export default function AssessmentReport({
               </li>
             ))}
           </ul>
-        </div>
-        <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
-          <h3 className="font-semibold text-theme-text-main mb-3">Fairness & Calibration</h3>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="p-5 pb-3">
+            <CardTitle className="text-base">Fairness & Calibration</CardTitle>
+          </CardHeader>
+          <CardContent className="p-5 pt-0">
           <ul className="space-y-2 text-sm text-theme-text-main">
             {fairnessChecks.map((check, index) => (
               <li key={`fair-${index}`} className="bg-theme-bg border border-theme-border rounded p-2">
@@ -239,11 +251,15 @@ export default function AssessmentReport({
               ? `${localeCalibration.locale} | ratings ${localeCalibration.humanRatings} | artifacts ${localeCalibration.artifactCount} | raters ${localeCalibration.raterCount} | ${localeCalibration.calibrated ? 'calibrated' : 'not calibrated'}`
               : 'not available'}
           </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
-        <h3 className="font-semibold text-theme-text-main mb-3">Development Plan</h3>
+      <Card>
+        <CardHeader className="p-5 pb-3">
+          <CardTitle className="text-base">Development Plan</CardTitle>
+        </CardHeader>
+        <CardContent className="p-5 pt-0">
         <div className="grid md:grid-cols-3 gap-3 text-sm">
           <div className="bg-theme-bg border border-theme-border rounded p-3">
             <div className="font-semibold text-theme-text-main mb-2">Immediate</div>
@@ -270,10 +286,14 @@ export default function AssessmentReport({
             ))}
           </div>
         </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
-        <h3 className="font-semibold text-theme-text-main mb-3">Dimension Trend Lines</h3>
+      <Card>
+        <CardHeader className="p-5 pb-3">
+          <CardTitle className="text-base">Dimension Trend Lines</CardTitle>
+        </CardHeader>
+        <CardContent className="p-5 pt-0">
         <div className="grid md:grid-cols-2 gap-4">
           {dimensionTrends.length === 0 && <p className="text-sm text-theme-text-muted">No trend data yet.</p>}
           {dimensionTrends.map((series) => (
@@ -284,15 +304,19 @@ export default function AssessmentReport({
             </div>
           ))}
         </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
-        <div className="flex items-center justify-between gap-3 mb-3">
-          <h3 className="font-semibold text-theme-text-main">Session History</h3>
+      <Card>
+        <CardHeader className="p-5 pb-3">
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="text-base">Session History</CardTitle>
           <span className="text-xs uppercase tracking-widest text-theme-text-muted">
             {sessionHistory.length} recorded session{sessionHistory.length === 1 ? '' : 's'}
           </span>
-        </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-5 pt-0">
         {sessionHistory.length === 0 ? (
           <p className="text-sm text-theme-text-muted">No sessions recorded yet for this account.</p>
         ) : (
@@ -304,21 +328,25 @@ export default function AssessmentReport({
                   {session.createdAt.slice(0, 10)} | {session.assessmentMode} | {session.locale}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <span className="rounded-full bg-white px-2 py-1 text-xs text-theme-text-main border border-theme-border">
+                  <Badge variant="secondary" className="bg-white">
                     {session.overallScore === 'NA' ? 'No evidence' : `Score ${session.overallScore}`}
-                  </span>
-                  <span className="rounded-full bg-white px-2 py-1 text-xs text-theme-text-main border border-theme-border">
+                  </Badge>
+                  <Badge variant="secondary" className="bg-white">
                     {Math.round(session.overallConfidence * 100)}% confidence
-                  </span>
+                  </Badge>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
-        <h3 className="font-semibold text-theme-text-main mb-3">Recommended Next Scenarios</h3>
+      <Card>
+        <CardHeader className="p-5 pb-3">
+          <CardTitle className="text-base">Recommended Next Scenarios</CardTitle>
+        </CardHeader>
+        <CardContent className="p-5 pt-0">
         <div className="space-y-2 text-sm">
           {recommendations.length === 0 && <p className="text-theme-text-muted">No recommendations available yet.</p>}
           {recommendations.map((recommendation, index) => (
@@ -329,15 +357,18 @@ export default function AssessmentReport({
             </div>
           ))}
         </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
-        <button
+      <Card>
+        <CardContent className="p-5">
+        <Button
           onClick={() => setShowTurnEvidence((previous) => !previous)}
-          className="w-full text-left font-semibold text-theme-text-main"
+          variant="ghost"
+          className="h-auto w-full justify-start p-0 text-left font-semibold text-theme-text-main hover:bg-transparent"
         >
           {showTurnEvidence ? 'Hide' : 'Show'} Turn-level Evidence Labels ({result.turnEvidence?.length || 0})
-        </button>
+        </Button>
         {showTurnEvidence && (
           <div className="mt-4 space-y-2 max-h-[320px] overflow-y-auto">
             {(result.turnEvidence || []).map((turn) => (
@@ -355,10 +386,14 @@ export default function AssessmentReport({
             ))}
           </div>
         )}
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="bg-theme-surface rounded-lg shadow-sm border border-theme-border p-5">
-        <h3 className="font-semibold text-theme-text-main mb-3">Recent Skill Sessions</h3>
+      <Card>
+        <CardHeader className="p-5 pb-3">
+          <CardTitle className="text-base">Recent Skill Sessions</CardTitle>
+        </CardHeader>
+        <CardContent className="p-5 pt-0">
         <div className="space-y-2 text-sm">
           {sortedHistory.length === 0 && <p className="text-theme-text-muted">No history yet for this skill.</p>}
           {sortedHistory.map((entry) => (
@@ -372,15 +407,17 @@ export default function AssessmentReport({
             </div>
           ))}
         </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <div className="flex justify-center pt-8 pb-12">
-        <button
+        <Button
           onClick={onReset}
-          className="px-6 py-2.5 bg-transparent border border-theme-border text-theme-text-main font-semibold rounded-md hover:bg-theme-bg transition-colors shadow-sm"
+          variant="outline"
+          className="px-6 py-2.5 shadow-sm"
         >
           Try Another Scenario
-        </button>
+        </Button>
       </div>
     </div>
   );
